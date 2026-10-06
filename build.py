@@ -1,0 +1,69 @@
+"""Build index.html (第2節 提示詞卡) from template.html. Edit the prompts here, then run: python3 build.py"""
+import html
+WORDLIST = "carrot 紅蘿蔔 🥕、broccoli 西蘭花 🥦、mushroom 蘑菇 🍄、pineapple 菠蘿 🍍、watermelon 西瓜 🍉、noodles 麵條 🍜、dumpling 餃子 🥟、sandwich 三文治 🥪、cheese 芝士 🧀、cereal 穀物早餐 🥣"
+STYLE = "要大字、大掣、色彩繽紛，平板同手機都用到，說明用繁體中文。"
+# (section title, [(tag, prompt, demo_link_or_None), ...])
+sections = [
+ ("做閃卡", [
+  ("示範例子 1 用嘅提示詞",
+   f"幫我整一個英文生字閃卡網頁，主題係食物，生字有：{WORDLIST}。卡片前面顯示英文同 emoji，按一下反轉，背面顯示中文意思同一句簡單例句。下面加「識」同「未識」兩個掣，玩完一輪之後再溫「未識」嘅字，最後顯示完成畫面同星星。加一個 🔊 掣用英式英文讀出個字。{STYLE}",
+   ("demo1/", "▶ 試玩示範例子 1：生字閃卡")),
+ ]),
+ ("做配對遊戲", [
+  ("示範例子 2 用嘅提示詞",
+   f"幫我整一個英文生字配對遊戲網頁，用呢 10 個食物生字：{WORDLIST}。先按英文字，再按啱嘅中文同 emoji 卡。配啱就兩張卡消失同歡呼，配錯就震一震。要有計時器同步數，完成時用星星評分，加「再玩一次」掣。按英文字嗰陣讀出個字。{STYLE}",
+   ("demo2/", "▶ 試玩示範例子 2：配對遊戲")),
+ ]),
+ ("做填充／串字遊戲", [
+  ("✏️ 填充遊戲",
+   f"幫我整一個英文填充遊戲網頁，用呢啲生字：carrot, broccoli, mushroom, pineapple, watermelon。每題係一句簡單英文句子，入面有一個空格，下面有三個生字掣俾我揀。答啱就有星星同鼓勵說話，答錯就話我知正確答案。{STYLE}", None),
+  ("🔤 串字遊戲",
+   f"幫我整一個英文串字遊戲網頁，用呢啲生字：noodles, dumpling, sandwich, cheese, cereal。每題顯示 emoji 同中文意思，再將英文字母打亂變成字母掣，我要按字母砌返個字出嚟。加「提示」掣同 🔊 讀音掣。{STYLE}", None),
+ ]),
+ ("做小測驗", [
+  ("📝 選擇題小測驗",
+   f"幫我整一個英文生字小測驗網頁，有 10 題選擇題，用呢 10 個食物生字：carrot, broccoli, mushroom, pineapple, watermelon, noodles, dumpling, sandwich, cheese, cereal。每題顯示一個 emoji，俾 4 個英文字我揀。一題一題出，答完顯示分數同星星，再列出我答錯嘅字。{STYLE}", None),
+ ]),
+ ("改一改：叫 Canvas 幫你改", [
+  ("🔠 字大啲", "將所有字同按鈕放大啲，等我喺平板上面易啲睇同按。", None),
+  ("🔊 加讀音", "加一個 🔊 掣，按一下就用英式英文慢慢讀出個英文字。", None),
+  ("⏱️ 加計時器", "加一個計時器，顯示我用咗幾多秒，完成嗰陣話我知總共用咗幾耐。", None),
+  ("🎨 換顏色", "將顏色改成粉藍色同粉綠色，再加啲可愛嘅食物 emoji 做裝飾。", None),
+  ("💬 加鼓勵說話", "每次答啱就顯示一句鼓勵說話，例如「好叻！」，答錯就顯示「再試吓！」。", None),
+ ]),
+]
+howto = '''<div class="howto"><h2>🪄 點樣用 Gemini Canvas？</h2><ol>
+<li>打開 <a href="https://gemini.google.com" target="_blank" rel="noopener">gemini.google.com</a>，喺輸入框下面揀「Canvas」（有時要先按「工具」）。</li>
+<li>貼上或者打提示詞，講清楚：生字、遊戲類型、想要咩樣。然後按送出。</li>
+<li>等一陣，右邊會出現網頁預覽，即刻試玩吓。</li>
+<li>想改？喺對話框再打一句，例如「字大啲」，Canvas 就會幫你改。</li></ol></div>'''
+n = 0; out = [howto]; titles = []
+for si, (title, ps) in enumerate(sections):
+    cards = []
+    for tag, p, demo in ps:
+        n += 1; titles.append(f"{n}. [{title}] {tag}")
+        cls = "tag demo-tag" if demo else "tag"
+        link = f'<a class="demo" href="{demo[0]}" target="_blank" rel="noopener">{demo[1]}</a>' if demo else ''
+        cards.append(f'<div class="card"><div class="num">{n}</div><div class="body"><span class="{cls}">{tag}</span><p class="prompt" id="p{n}">{html.escape(p)}</p>{link}</div><button class="copy" data-target="p{n}">📋 複製</button></div>')
+    out.append(f'<section><h2><span class="sn">{si+1}</span>{html.escape(title)}</h2>{"".join(cards)}</section>')
+n += 1; titles.append(f"{n}. [自己砌提示詞] 填空模板")
+def chips(field, items):
+    return "".join(f'<button type="button" class="chip" data-field="{field}">{i}</button>' for i in items)
+builder = f'''<section><h2><span class="sn">{len(sections)+1}</span>自己砌提示詞：用你課本嘅生字</h2>
+<div class="card builder"><div class="num">{n}</div><div class="body">
+<span class="tag">填空模板</span>
+<p class="tpl">幫我整一個適合【年級】學生用嘅英文生字【遊戲類型】網頁，主題係【主題】，生字有：【生字】……</p>
+<label class="lab">① 年級<input id="f-grade" placeholder="揀一個或者自己打"></label>
+<div class="chips">{chips("grade",["小四","小五","小六"])}</div>
+<label class="lab">② 主題<input id="f-topic" placeholder="揀一個或者自己打"></label>
+<div class="chips">{chips("topic",["食物","動物","天氣","交通工具"])}</div>
+<label class="lab">③ 生字（用逗號分開）<input id="f-words" placeholder="例如：cat, dog, rabbit, tiger, panda"></label>
+<label class="lab">④ 遊戲類型<input id="f-game" placeholder="揀一個或者自己打"></label>
+<div class="chips">{chips("game",["閃卡","配對遊戲","填充遊戲","串字遊戲","小測驗"])}</div>
+<div class="preview-lab">👀 你嘅提示詞：</div>
+<p class="prompt preview" id="p{n}"></p>
+</div><button class="copy" data-target="p{n}">📋 複製</button></div></section>'''
+out.append(builder)
+page = open('template.html', encoding='utf-8').read().replace('%%SECTIONS%%', "\n".join(out)).replace('%%BUILDER_ID%%', f'p{n}')
+open('index.html', 'w', encoding='utf-8').write(page)
+print("\n".join(titles))

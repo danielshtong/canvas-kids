@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第2節 Gemini Canvas・自製溫習材料提示詞卡</title>
+<style>
+:root{--bg:#fbf6ea;--card:#fffdf7;--ink:#3d3a2f;--green:#6f9a5b;--sky:#8fbcd4;--coral:#e0896b;--sun:#f3c969;--muted:#7a7462}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","PingFang HK","Microsoft JhengHei",sans-serif;background:linear-gradient(#dcefe9,var(--bg) 320px);color:var(--ink);font-size:22px;line-height:1.6}
+.safety{background:#fff1d6;border-bottom:3px solid var(--sun);text-align:center;padding:12px 16px;font-weight:700;font-size:22px}
+header{text-align:center;padding:22px 16px 6px}
+h1{margin:0;font-size:36px;color:#4f7a43}
+.sub{color:var(--muted);margin:4px 0 0}
+.steps{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;padding:16px;position:sticky;top:0;z-index:5;background:rgba(251,246,234,.95);border-bottom:2px dashed #d9cfb3}
+.step{background:var(--card);border:3px solid var(--sky);border-radius:18px;padding:10px 18px;font-weight:700;font-size:21px;text-decoration:none;color:var(--ink);min-height:56px;display:flex;align-items:center}
+.step b{background:var(--sky);color:#fff;border-radius:50%;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;margin-right:8px}
+a.step{border-color:var(--green)}a.step:hover{background:#eef6e8}
+main{max-width:980px;margin:0 auto;padding:10px 16px 40px}
+h2{font-size:28px;color:#5b4a2e;margin:34px 0 12px;display:flex;align-items:center;gap:12px}
+.sn{background:var(--coral);color:#fff;border-radius:14px;min-width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center}
+.card{display:flex;align-items:center;gap:16px;background:var(--card);border-radius:22px;padding:18px;margin:14px 0;box-shadow:0 4px 0 #e6dcc2;border:2px solid #efe6cf}
+.num{flex:0 0 46px;height:46px;border-radius:50%;background:#e6f0dc;color:#4f7a43;font-weight:800;display:flex;align-items:center;justify-content:center}
+.body{flex:1;min-width:0}
+.tag{display:inline-block;background:#fdeee0;color:#a2593c;border-radius:10px;padding:2px 12px;font-size:18px;font-weight:700}
+.prompt{margin:6px 0 0;font-size:26px}
+.copy{flex:0 0 auto;font-size:24px;font-weight:800;padding:0 24px;min-height:72px;min-width:140px;border:none;border-radius:20px;background:var(--green);color:#fff;box-shadow:0 5px 0 #4f7a43;cursor:pointer;font-family:inherit}
+.copy:active{transform:translateY(3px);box-shadow:0 2px 0 #4f7a43}
+.copy.done{background:var(--coral);box-shadow:0 5px 0 #b3654a}
+.builder{align-items:flex-end}
+.tpl{color:var(--muted);margin:6px 0 10px}
+.lab{display:block;font-weight:700;margin-top:12px}
+.lab input{display:block;width:100%;font-size:24px;padding:12px 14px;border:3px solid #d9cfb3;border-radius:14px;margin-top:6px;font-family:inherit;background:#fff}
+.lab input:focus{outline:none;border-color:var(--sky)}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.chip{font-size:21px;min-height:52px;padding:0 18px;border-radius:26px;border:3px solid var(--sun);background:#fffbea;cursor:pointer;font-family:inherit;color:var(--ink)}
+.chip.on{background:var(--sun);font-weight:800}
+.preview-lab{margin-top:16px;font-weight:700;color:#4f7a43}
+.preview{background:#f1f8ec;border-radius:14px;padding:12px 14px;border:2px dashed var(--green)}
+.rules{background:#fff;border-radius:22px;padding:14px 22px;margin-top:34px;border:3px solid #f0d9a0}
+.rules h2{margin:8px 0}
+.rules ul{margin:0;padding-left:1.1em}
+.howto{background:var(--card);border-radius:22px;padding:14px 22px;margin:18px 0 0;border:3px solid var(--sky)}
+.howto h2{margin:6px 0 8px}
+.howto ol{margin:0;padding-left:1.4em}.howto li{margin:4px 0}
+.demo{display:inline-block;margin-top:10px;font-size:20px;font-weight:800;color:#fff;background:var(--sky);border-radius:14px;padding:8px 16px;text-decoration:none;box-shadow:0 4px 0 #5f93ad}
+.demo:active{transform:translateY(2px);box-shadow:0 2px 0 #5f93ad}
+.tag.demo-tag{background:#e6f0fb;color:#2f6f95}
+footer{text-align:center;color:var(--muted);font-size:18px;padding:20px}
+@media (max-width:640px){.card{flex-wrap:wrap}.copy{width:100%}.num{display:none}body{font-size:20px}.prompt{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="safety">🛡️ 唔好輸入真名、學號、學校、地址、相片</div>
+<header><h1>🦊 第2節 Gemini Canvas・自製溫習材料提示詞卡</h1><p class="sub">Kiko 話你知：講清楚「生字＋遊戲類型＋樣式」，Canvas 就幫你整溫習網頁</p></header>
+<nav class="steps">
+<span class="step"><b>1</b>按「複製」</span>
+<a class="step" href="https://gemini.google.com" target="_blank" rel="noopener"><b>2</b>打開 Gemini</a>
+<span class="step"><b>3</b>揀「Canvas」</span>
+<span class="step"><b>4</b>貼上・送出</span>
+<span class="step"><b>5</b>睇預覽</span>
+<span class="step"><b>6</b>叫佢改一改</span>
+</nav>
+<main>
+%%SECTIONS%%
+<div class="rules"><h2>🛡️ Kiko 安全同誠實守則</h2><ul>
+<li>唔好輸入真實姓名、學號、學校、地址、電話、相片</li>
+<li>AI 都會錯！中文意思、串法同例句，要同老師或者課本核對</li>
+<li>用 Canvas 整嘢嚟溫習，唔好用嚟抄功課或者叫 AI 代你做功課</li>
+<li>分享作品時講明「用 AI 協助製作」</li></ul></div>
+</main>
+<footer>⭐ 記住：AI 幫你整溫習工具，真正學識生字嘅係你自己！</footer>
+<script>
+(function(){
+  function fallbackCopy(text){
+    var ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');
+    ta.style.position='fixed';ta.style.top='-1000px';document.body.appendChild(ta);
+    ta.select();ta.setSelectionRange(0,text.length);var ok=false;
+    try{ok=document.execCommand('copy');}catch(e){}
+    document.body.removeChild(ta);return ok;
+  }
+  function copyText(text){
+    if(navigator.clipboard&&window.isSecureContext){
+      return navigator.clipboard.writeText(text).then(function(){return true;},function(){return fallbackCopy(text);});
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  document.querySelectorAll('.copy').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var text=document.getElementById(btn.dataset.target).textContent.trim();
+      copyText(text).then(function(ok){
+        btn.textContent=ok?'✅ 已複製！':'請長按文字複製';btn.classList.add('done');
+        clearTimeout(btn._t);btn._t=setTimeout(function(){btn.textContent='📋 複製';btn.classList.remove('done');},1500);
+      });
+    });
+  });
+  var f={grade:document.getElementById('f-grade'),topic:document.getElementById('f-topic'),words:document.getElementById('f-words'),game:document.getElementById('f-game')};
+  var prev=document.getElementById('%%BUILDER_ID%%');
+  function render(){
+    var g=f.grade.value.trim()||'【年級】',t=f.topic.value.trim()||'【主題】',w=f.words.value.trim()||'【生字】',k=f.game.value.trim()||'【遊戲類型】';
+    prev.textContent='幫我整一個適合'+g+'學生用嘅英文生字'+k+'網頁，主題係'+t+'，生字有：'+w+'。每個生字都要有中文意思同 emoji。要大字、大掣、色彩繽紛，平板同手機都用到，說明用繁體中文。';
+    document.querySelectorAll('.chip').forEach(function(ch){ch.classList.toggle('on',f[ch.dataset.field].value.trim()===ch.textContent);});
+  }
+  document.querySelectorAll('.chip').forEach(function(ch){
+    ch.addEventListener('click',function(){f[ch.dataset.field].value=ch.textContent;render();});
+  });
+  Object.keys(f).forEach(function(k){f[k].addEventListener('input',render);});
+  render();
+})();
+</script>
+</body>
+</html>

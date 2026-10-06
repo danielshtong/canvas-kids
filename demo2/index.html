@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>食物生字配對遊戲</title>
+<script>
+// ===== 生字表（改呢度就可以換生字）=====
+const WORDS = [
+  { en: "carrot",     zh: "紅蘿蔔",   emoji: "🥕" },
+  { en: "broccoli",   zh: "西蘭花",   emoji: "🥦" },
+  { en: "mushroom",   zh: "蘑菇",     emoji: "🍄" },
+  { en: "pineapple",  zh: "菠蘿",     emoji: "🍍" },
+  { en: "watermelon", zh: "西瓜",     emoji: "🍉" },
+  { en: "noodles",    zh: "麵條",     emoji: "🍜" },
+  { en: "dumpling",   zh: "餃子",     emoji: "🥟" },
+  { en: "sandwich",   zh: "三文治",   emoji: "🥪" },
+  { en: "cheese",     zh: "芝士",     emoji: "🧀" },
+  { en: "cereal",     zh: "穀物早餐", emoji: "🥣" }
+];
+</script>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; min-height: 100vh; padding: 14px;
+    font-family: "Nunito", "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", system-ui, sans-serif;
+    background: linear-gradient(160deg, #c3f5d8 0%, #fff6b8 55%, #ffd0c2 100%);
+    color: #2f3a56;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { text-align: center; margin: 4px 0; font-size: clamp(26px, 6vw, 40px); }
+  .how { text-align: center; margin: 0 0 12px; font-size: 18px; color: #5a6380; }
+  .stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .stat { background: #fff; border-radius: 18px; padding: 8px 16px; font-size: 20px; font-weight: 900; box-shadow: 0 4px 0 rgba(0,0,0,.08); min-width: 120px; text-align: center; }
+  .board { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .col-title { text-align: center; font-weight: 900; font-size: 20px; margin-bottom: 6px; }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+  .tile {
+    min-height: 64px; border: none; border-radius: 20px; font-family: inherit; font-weight: 900; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 10px;
+    transition: transform .12s, opacity .4s, background .2s; position: relative;
+  }
+  .en { background: #4f8cff; color: #fff; font-size: clamp(20px, 4.6vw, 28px); box-shadow: 0 6px 0 #2f63c9; }
+  .zh { background: #fff; color: #2f3a56; font-size: clamp(20px, 4.6vw, 28px); box-shadow: 0 6px 0 #d9c9a8; border: 3px solid #ffe08a; }
+  .zh .em { font-size: 1.3em; }
+  .tile:active { transform: translateY(3px); }
+  .tile.selected { background: #ffb020; box-shadow: 0 6px 0 #c77f00; transform: scale(1.05); color: #fff; }
+  .tile.correct { background: #22c55e !important; color: #fff; box-shadow: 0 6px 0 #15803d; animation: bounce .5s; }
+  .tile.gone { opacity: 0; transform: scale(.4); pointer-events: none; }
+  .tile.removed { display: none; }
+  .tile.wrong { background: #ff5a5a !important; color: #fff; box-shadow: 0 6px 0 #c22d2d; animation: shake .45s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-7px)} 80%{transform:translateX(7px)} }
+  @keyframes bounce { 0%{transform:scale(1)} 40%{transform:scale(1.15)} 100%{transform:scale(1)} }
+  .cheer {
+    position: fixed; left: 50%; top: 40%; transform: translate(-50%,-50%) scale(0); font-size: clamp(34px, 8vw, 56px); font-weight: 900;
+    background: #fff; padding: 14px 28px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,.18); pointer-events: none; z-index: 20;
+    color: #16a34a; white-space: nowrap;
+  }
+  .cheer.show { animation: cheer 0.9s ease-out; }
+  @keyframes cheer { 0%{transform:translate(-50%,-50%) scale(0)} 25%{transform:translate(-50%,-50%) scale(1.15)} 70%{transform:translate(-50%,-50%) scale(1);opacity:1} 100%{transform:translate(-50%,-80%) scale(1);opacity:0} }
+  .confetti { position: fixed; font-size: 30px; pointer-events: none; z-index: 19; animation: fall 1.2s ease-in forwards; }
+  @keyframes fall { from { transform: translateY(0) rotate(0); opacity: 1; } to { transform: translateY(160px) rotate(360deg); opacity: 0; } }
+  .overlay { position: fixed; inset: 0; background: rgba(47,58,86,.55); display: none; align-items: center; justify-content: center; z-index: 30; padding: 16px; }
+  .overlay.show { display: flex; }
+  .panel { background: #fff; border-radius: 32px; padding: 28px 22px; text-align: center; max-width: 440px; width: 100%; }
+  .panel h2 { font-size: 38px; margin: 0 0 6px; }
+  .stars { font-size: 60px; letter-spacing: 6px; }
+  .stars span { display: inline-block; animation: pop .5s both; }
+  .stars span:nth-child(2){animation-delay:.2s} .stars span:nth-child(3){animation-delay:.4s}
+  @keyframes pop { from { transform: scale(0) rotate(-40deg); } to { transform: scale(1); } }
+  .panel p { font-size: 22px; margin: 8px 0; }
+  .again { margin-top: 14px; min-height: 76px; padding: 0 34px; border: none; border-radius: 24px; background: #7c5cff; color: #fff; font-size: 28px; font-weight: 900; font-family: inherit; box-shadow: 0 6px 0 #5434d4; cursor: pointer; }
+  .again:active { transform: translateY(4px); box-shadow: 0 2px 0 #5434d4; }
+  .tip { text-align: center; min-height: 28px; font-size: 19px; font-weight: 800; color: #c2410c; margin: 4px 0 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🍍 食物生字配對遊戲 🥟</h1>
+  <p class="how">① 先按左邊嘅英文字　② 再按右邊啱嘅中文</p>
+  <div class="stats">
+    <div class="stat">⏱️ <span id="time">00:00</span></div>
+    <div class="stat">👆 步數 <span id="moves">0</span></div>
+    <div class="stat">✅ <span id="pairs">0</span> / <span id="total">10</span></div>
+  </div>
+  <div class="tip" id="tip"></div>
+  <div class="board">
+    <div><div class="col-title">🔤 English</div><div class="col" id="enCol"></div></div>
+    <div><div class="col-title">🀄 中文</div><div class="col" id="zhCol"></div></div>
+  </div>
+</div>
+
+<div class="cheer" id="cheer">好叻！👏</div>
+
+<div class="overlay" id="overlay">
+  <div class="panel">
+    <h2>🎉 全部配對成功！</h2>
+    <div class="stars" id="stars"></div>
+    <p id="result"></p>
+    <p id="praise" style="color:#5a6380"></p>
+    <button class="again" id="again">🔄 再玩一次</button>
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const CHEERS = ["好叻！👏", "答啱！🎉", "勁呀！⭐", "Well done! 🙌", "超正！🥳"];
+  let selected = null, moves = 0, pairs = 0, seconds = 0, timer = null, locked = false;
+
+  function shuffle(a) { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  function speak(text) {
+    if (!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-GB"; u.rate = 0.85;
+    const v = speechSynthesis.getVoices().find(v => v.lang === "en-GB");
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  }
+
+  let audioCtx = null;
+  function ding(ok) {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const notes = ok ? [523, 659, 784] : [220, 180];
+      notes.forEach((f, i) => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = ok ? "triangle" : "sawtooth"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.15, audioCtx.currentTime + i * 0.1);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.1 + 0.25);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(audioCtx.currentTime + i * 0.1); o.stop(audioCtx.currentTime + i * 0.1 + 0.3);
+      });
+    } catch (e) {}
+  }
+
+  function fmt(s) { return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+  function startTimer() { if (timer) return; timer = setInterval(() => { seconds++; $("time").textContent = fmt(seconds); }, 1000); }
+
+  function cheer(x, y, emoji) {
+    const c = $("cheer");
+    c.textContent = CHEERS[Math.floor(Math.random() * CHEERS.length)];
+    c.classList.remove("show"); void c.offsetWidth; c.classList.add("show");
+    for (let i = 0; i < 8; i++) {
+      const s = document.createElement("div");
+      s.className = "confetti"; s.textContent = i % 2 ? emoji : ["⭐", "🎉", "✨"][i % 3];
+      s.style.left = (x + (Math.random() - .5) * 200) + "px"; s.style.top = (y - 40 + (Math.random() - .5) * 60) + "px";
+      document.body.appendChild(s); setTimeout(() => s.remove(), 1300);
+    }
+  }
+
+  function tip(msg) { $("tip").textContent = msg; clearTimeout(tip.t); tip.t = setTimeout(() => $("tip").textContent = "", 1600); }
+
+  function shake(el) { el.classList.remove("wrong"); void el.offsetWidth; el.classList.add("wrong"); setTimeout(() => el.classList.remove("wrong"), 500); }
+
+  function onEn(btn, w) {
+    if (locked) return;
+    startTimer();
+    if (selected) selected.classList.remove("selected");
+    selected = btn; btn.classList.add("selected");
+    speak(w.en);
+  }
+
+  function onZh(btn, w) {
+    if (locked) return;
+    if (!selected) { shake(btn); tip("👈 先揀一個英文字呀！"); return; }
+    moves++; $("moves").textContent = moves;
+    const enBtn = selected;
+    if (enBtn.dataset.en === w.en) {
+      selected = null; locked = true;
+      enBtn.classList.remove("selected");
+      enBtn.classList.add("correct"); btn.classList.add("correct");
+      ding(true);
+      const r = btn.getBoundingClientRect();
+      cheer(r.left + r.width / 2, r.top, w.emoji);
+      setTimeout(() => { enBtn.classList.add("gone"); btn.classList.add("gone"); locked = false; }, 550);
+      setTimeout(() => { enBtn.classList.add("removed"); btn.classList.add("removed"); }, 950);
+      pairs++; $("pairs").textContent = pairs;
+      if (pairs === WORDS.length) setTimeout(finish, 1000);
+    } else {
+      ding(false);
+      shake(enBtn); shake(btn);
+      tip("唔啱呀，再試吓 💪");
+    }
+  }
+
+  function finish() {
+    clearInterval(timer); timer = null;
+    const n = WORDS.length;
+    const stars = moves <= n + 2 ? 3 : moves <= n + 6 ? 2 : 1;
+    $("stars").innerHTML = "<span>⭐</span>".repeat(stars) + "<span style='opacity:.25'>⭐</span>".repeat(3 - stars);
+    $("result").textContent = `用咗 ${fmt(seconds)}，${moves} 步完成`;
+    $("praise").textContent = { 3: "完美！你係配對小專家 🏆", 2: "好叻！下次試吓用少啲步數 💪", 1: "完成咗！再玩多次會更快 🌱" }[stars];
+    $("overlay").classList.add("show");
+  }
+
+  function build() {
+    clearInterval(timer); timer = null;
+    selected = null; moves = 0; pairs = 0; seconds = 0; locked = false;
+    $("moves").textContent = 0; $("pairs").textContent = 0; $("time").textContent = "00:00"; $("total").textContent = WORDS.length;
+    $("overlay").classList.remove("show");
+    const enCol = $("enCol"), zhCol = $("zhCol");
+    enCol.innerHTML = ""; zhCol.innerHTML = "";
+    shuffle(WORDS).forEach(w => {
+      const b = document.createElement("button");
+      b.className = "tile en"; b.textContent = w.en; b.dataset.en = w.en;
+      b.onclick = () => onEn(b, w); enCol.appendChild(b);
+    });
+    shuffle(WORDS).forEach(w => {
+      const b = document.createElement("button");
+      b.className = "tile zh"; b.innerHTML = `<span class="em">${w.emoji}</span><span>${w.zh}</span>`;
+      b.onclick = () => onZh(b, w); zhCol.appendChild(b);
+    });
+  }
+
+  $("again").onclick = build;
+  build();
+</script>
+</body>
+</html>

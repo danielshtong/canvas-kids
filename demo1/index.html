@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>食物英文生字閃卡</title>
+<script>
+// ===== 生字表（改呢度就可以換生字）=====
+const WORDS = [
+  { en: "carrot",     zh: "紅蘿蔔",   emoji: "🥕", sentence: "Rabbits like to eat carrots." },
+  { en: "broccoli",   zh: "西蘭花",   emoji: "🥦", sentence: "Broccoli is a green vegetable." },
+  { en: "mushroom",   zh: "蘑菇",     emoji: "🍄", sentence: "I put a mushroom in my soup." },
+  { en: "pineapple",  zh: "菠蘿",     emoji: "🍍", sentence: "The pineapple is sweet." },
+  { en: "watermelon", zh: "西瓜",     emoji: "🍉", sentence: "We eat watermelon in summer." },
+  { en: "noodles",    zh: "麵條",     emoji: "🍜", sentence: "I eat noodles for lunch." },
+  { en: "dumpling",   zh: "餃子",     emoji: "🥟", sentence: "My grandma makes dumplings." },
+  { en: "sandwich",   zh: "三文治",   emoji: "🥪", sentence: "I have a sandwich for breakfast." },
+  { en: "cheese",     zh: "芝士",     emoji: "🧀", sentence: "The mouse likes cheese." },
+  { en: "cereal",     zh: "穀物早餐", emoji: "🥣", sentence: "I eat cereal with milk." }
+];
+</script>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; min-height: 100vh;
+    font-family: "Nunito", "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", system-ui, sans-serif;
+    background: linear-gradient(135deg, #fff3c4 0%, #ffd6e7 50%, #c9f0ff 100%);
+    color: #3b2f5c; display: flex; flex-direction: column; align-items: center;
+    padding: 16px;
+  }
+  h1 { margin: 6px 0 2px; font-size: clamp(26px, 6vw, 40px); text-align: center; }
+  .subtitle { margin: 0 0 12px; font-size: 18px; color: #6b5b8f; text-align: center; }
+  .bar { width: 100%; max-width: 560px; display: flex; gap: 10px; justify-content: space-between; align-items: center; font-weight: 800; font-size: 18px; }
+  .pill { background: #fff; border-radius: 999px; padding: 6px 14px; box-shadow: 0 3px 0 rgba(0,0,0,.08); white-space: nowrap; }
+  .progress { width: 100%; max-width: 560px; height: 14px; background: rgba(255,255,255,.7); border-radius: 999px; margin: 10px 0 16px; overflow: hidden; }
+  .progress > div { height: 100%; width: 0; background: linear-gradient(90deg, #ff8a5b, #ffcf3f); border-radius: 999px; transition: width .4s; }
+  .round-tag { display: inline-block; background: #7c5cff; color: #fff; padding: 4px 14px; border-radius: 999px; font-size: 16px; margin-bottom: 8px; }
+
+  .scene { width: 100%; max-width: 560px; aspect-ratio: 4 / 3; perspective: 1200px; cursor: pointer; }
+  .card { position: relative; width: 100%; height: 100%; transition: transform .6s cubic-bezier(.3,1.4,.5,1); transform-style: preserve-3d; }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    position: absolute; inset: 0; border-radius: 32px; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;
+    box-shadow: 0 10px 0 rgba(59,47,92,.15), 0 20px 40px rgba(59,47,92,.15);
+    border: 6px solid #fff;
+  }
+  .front { background: linear-gradient(160deg, #ffffff, #fff7d6); }
+  .back { background: linear-gradient(160deg, #e9fff1, #d4f3ff); transform: rotateY(180deg); }
+  .emoji { font-size: clamp(80px, 22vw, 130px); line-height: 1.1; }
+  .word { font-size: clamp(40px, 11vw, 68px); font-weight: 900; color: #ff6b3d; letter-spacing: 1px; }
+  .zh { font-size: clamp(44px, 12vw, 72px); font-weight: 900; color: #1f9d6b; }
+  .sentence { font-size: clamp(20px, 5vw, 28px); margin-top: 10px; color: #3b2f5c; font-weight: 700; }
+  .hint { margin-top: 8px; font-size: 16px; color: #8d7fb3; }
+  .speak {
+    position: absolute; top: 14px; right: 14px; width: 64px; height: 64px; border-radius: 50%;
+    border: none; background: #ffcf3f; font-size: 30px; cursor: pointer; box-shadow: 0 4px 0 #d9a400;
+  }
+  .speak:active { transform: translateY(3px); box-shadow: 0 1px 0 #d9a400; }
+
+  .buttons { display: flex; gap: 16px; width: 100%; max-width: 560px; margin-top: 22px; }
+  .btn {
+    flex: 1; min-height: 80px; border: none; border-radius: 24px; font-size: 30px; font-weight: 900; color: #fff;
+    cursor: pointer; font-family: inherit; transition: transform .1s;
+  }
+  .btn:active { transform: translateY(4px); }
+  .know { background: #22c55e; box-shadow: 0 6px 0 #15803d; }
+  .dontknow { background: #f97316; box-shadow: 0 6px 0 #c2410c; }
+  .big { background: #7c5cff; box-shadow: 0 6px 0 #5434d4; padding: 0 30px; }
+
+  .screen { display: none; width: 100%; max-width: 560px; background: #fff; border-radius: 32px; padding: 30px 20px; text-align: center; box-shadow: 0 10px 0 rgba(59,47,92,.12); }
+  .screen h2 { font-size: 36px; margin: 6px 0; }
+  .screen p { font-size: 22px; margin: 8px 0; }
+  .stars { font-size: 64px; letter-spacing: 6px; margin: 10px 0; }
+  .stars span { display: inline-block; animation: pop .5s both; }
+  .stars span:nth-child(2) { animation-delay: .2s; } .stars span:nth-child(3) { animation-delay: .4s; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 12px 0 18px; }
+  .chips span { background: #fff1e6; border-radius: 999px; padding: 6px 14px; font-size: 20px; font-weight: 800; }
+  @keyframes pop { from { transform: scale(0) rotate(-30deg); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+  <h1>🥕 食物英文生字閃卡 🍉</h1>
+  <p class="subtitle">按卡片睇中文意思，再揀「識」定「未識」</p>
+
+  <div id="game" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+    <div class="bar">
+      <span class="pill" id="count">第 1 / 10 張</span>
+      <span class="pill">😊 <span id="knownN">0</span>　🤔 <span id="unknownN">0</span></span>
+    </div>
+    <div class="progress"><div id="prog"></div></div>
+    <span class="round-tag hidden" id="roundTag">🔁 重溫時間</span>
+
+    <div class="scene" id="scene">
+      <div class="card" id="card">
+        <div class="face front">
+          <button class="speak" id="speakFront" aria-label="讀出英文">🔊</button>
+          <div class="emoji" id="emoji">🥕</div>
+          <div class="word" id="word">carrot</div>
+          <div class="hint">👆 按一下反轉</div>
+        </div>
+        <div class="face back">
+          <button class="speak" id="speakBack" aria-label="讀出例句">🔊</button>
+          <div class="zh" id="zh">紅蘿蔔</div>
+          <div class="sentence" id="sentence">Rabbits like to eat carrots.</div>
+          <div class="hint">👆 再按一下翻返去</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn dontknow" id="noBtn">🤔 未識</button>
+      <button class="btn know" id="yesBtn">😊 識</button>
+    </div>
+  </div>
+
+  <div class="screen" id="reviewScreen">
+    <h2>💪 重溫時間！</h2>
+    <p>仲有 <b id="reviewN">0</b> 個字未識，我哋再練多次：</p>
+    <div class="chips" id="reviewList"></div>
+    <button class="btn big" id="startReview">開始重溫 ▶</button>
+  </div>
+
+  <div class="screen" id="doneScreen">
+    <h2>🎉 完成！</h2>
+    <div class="stars" id="stars"></div>
+    <p id="doneMsg"></p>
+    <p id="doneDetail" style="color:#6b5b8f;font-size:19px;"></p>
+    <button class="btn big" id="againBtn">🔄 再玩一次</button>
+  </div>
+
+<script>
+  let queue = [], unknown = [], index = 0, round = 1;
+  let firstRoundKnown = 0, reviewRounds = 0;
+  const $ = id => document.getElementById(id);
+
+  function speak(text) {
+    if (!("speechSynthesis" in window)) { alert("呢部機唔支援讀音 🙏"); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-GB";
+    u.rate = 0.85;
+    const voice = speechSynthesis.getVoices().find(v => v.lang === "en-GB") ||
+                  speechSynthesis.getVoices().find(v => v.lang.startsWith("en"));
+    if (voice) u.voice = voice;
+    speechSynthesis.speak(u);
+  }
+
+  function showCard() {
+    const w = queue[index];
+    $("card").classList.remove("flipped");
+    setTimeout(() => {
+      $("emoji").textContent = w.emoji;
+      $("word").textContent = w.en;
+      $("zh").textContent = w.zh;
+      $("sentence").textContent = w.sentence;
+    }, 150);
+    $("count").textContent = `第 ${index + 1} / ${queue.length} 張`;
+    $("prog").style.width = (index / queue.length * 100) + "%";
+    $("knownN").textContent = index - unknown.length;
+    $("unknownN").textContent = unknown.length;
+    $("roundTag").classList.toggle("hidden", round === 1);
+  }
+
+  function answer(know) {
+    const w = queue[index];
+    if (know) { if (round === 1) firstRoundKnown++; }
+    else unknown.push(w);
+    index++;
+    if (index < queue.length) { showCard(); return; }
+    endRound();
+  }
+
+  function endRound() {
+    $("game").classList.add("hidden");
+    if (unknown.length > 0) {
+      $("reviewN").textContent = unknown.length;
+      $("reviewList").innerHTML = unknown.map(w => `<span>${w.emoji} ${w.en}</span>`).join("");
+      $("reviewScreen").style.display = "block";
+    } else {
+      showDone();
+    }
+  }
+
+  function startReview() {
+    queue = unknown; unknown = []; index = 0; round++; reviewRounds++;
+    $("reviewScreen").style.display = "none";
+    $("game").classList.remove("hidden");
+    showCard();
+  }
+
+  function showDone() {
+    const total = WORDS.length;
+    const stars = firstRoundKnown >= total - 1 ? 3 : firstRoundKnown >= Math.ceil(total * 0.6) ? 2 : 1;
+    $("stars").innerHTML = "<span>⭐</span>".repeat(stars) + "<span style='opacity:.25'>⭐</span>".repeat(3 - stars);
+    const msgs = { 3: "超級叻！你係生字小達人 🏆", 2: "做得好！再溫多次就更勁 💪", 1: "有進步！繼續努力 🌱" };
+    $("doneMsg").textContent = msgs[stars];
+    $("doneDetail").textContent = `第一次已經識 ${firstRoundKnown} / ${total} 個字` +
+      (reviewRounds ? `，重溫咗 ${reviewRounds} 輪，而家全部都識晒！` : "，全部一次過識晒！");
+    $("doneScreen").style.display = "block";
+  }
+
+  function start() {
+    queue = [...WORDS]; unknown = []; index = 0; round = 1; firstRoundKnown = 0; reviewRounds = 0;
+    $("doneScreen").style.display = "none";
+    $("reviewScreen").style.display = "none";
+    $("game").classList.remove("hidden");
+    showCard();
+  }
+
+  $("scene").addEventListener("click", () => $("card").classList.toggle("flipped"));
+  $("speakFront").addEventListener("click", e => { e.stopPropagation(); speak(queue[index].en); });
+  $("speakBack").addEventListener("click", e => { e.stopPropagation(); speak(queue[index].en + ". " + queue[index].sentence); });
+  $("yesBtn").addEventListener("click", () => answer(true));
+  $("noBtn").addEventListener("click", () => answer(false));
+  $("startReview").addEventListener("click", startReview);
+  $("againBtn").addEventListener("click", start);
+  if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => {};
+
+  start();
+</script>
+</body>
+</html>
