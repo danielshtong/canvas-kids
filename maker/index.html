@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="第3節：小學生自製溫習閃卡。寫正面同背面、反轉預覽、八點負責任 AI 檢查、列印同下載。">
+<meta name="color-scheme" content="light">
+<title>第3節・自製溫習閃卡</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
+  background: linear-gradient(#dcefe9, #fbf6ea 320px);
+  color: #2c291c;
+  font-size: 20px;
+  line-height: 1.55;
+}
+.safety {
+  background: #fff1d6;
+  border-bottom: 3px solid #e0b03a;
+  text-align: center;
+  padding: 12px 16px;
+  font-weight: 800;
+  font-size: 20px;
+}
+header { text-align: center; padding: 18px 16px 8px; }
+h1 { margin: 0; font-size: clamp(28px, 7vw, 40px); color: #3d6b34; line-height: 1.25; }
+.sub { color: #5c5648; margin: 8px 0 0; }
+.home {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  margin-bottom: 8px;
+  color: #1d5c8a;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: rgba(251, 246, 234, .96);
+  border-bottom: 2px dashed #d9cfb3;
+}
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 12px 16px;
+}
+.step {
+  background: #fffdf7;
+  border: 3px solid #8fbcd4;
+  border-radius: 18px;
+  padding: 8px 14px;
+  font-weight: 800;
+  font-size: 20px;
+  text-decoration: none;
+  color: #2c291c;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+}
+.step b {
+  background: #1d5c8a;
+  color: #fff;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  flex: 0 0 auto;
+}
+.status { margin: 0; padding: 0 16px; font-weight: 800; font-size: 20px; }
+.status:not(:empty) { padding: 10px 16px 12px; }
+.status.ok:not(:empty) { background: #e6f0dc; color: #1f4d3a; }
+.status.warn:not(:empty) { background: #fff1d6; color: #2c291c; }
+main { max-width: 980px; margin: 0 auto; padding: 8px 16px 40px; }
+section { scroll-margin-top: 130px; }
+h2 {
+  font-size: 28px;
+  color: #5b4a2e;
+  margin: 28px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+h3 { margin: 18px 0 8px; font-size: 22px; color: #5b4a2e; }
+.sn {
+  background: #e6f0dc;
+  color: #2f6a3c;
+  border-radius: 14px;
+  min-width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+.count {
+  font-size: 20px;
+  background: #fff;
+  border-radius: 999px;
+  padding: 2px 12px;
+  border: 2px solid #efe6cf;
+}
+.panel {
+  background: #fffdf7;
+  border: 2px solid #efe6cf;
+  border-radius: 22px;
+  padding: 14px 16px 18px;
+  box-shadow: 0 4px 0 #e6dcc2;
+}
+.note { margin: 6px 0 10px; color: #5c5648; font-size: 20px; }
+.lab { display: block; font-weight: 800; font-size: 22px; margin-top: 14px; }
+.lab input, .lab textarea {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  font: inherit;
+  font-size: 22px;
+  line-height: 1.45;
+  padding: 12px 14px;
+  border: 3px solid #d9cfb3;
+  border-radius: 14px;
+  background: #fff;
+  color: #2c291c;
+}
+.lab textarea { min-height: 112px; resize: vertical; }
+.lab input:focus, .lab textarea:focus { outline: none; border-color: #1d5c8a; }
+::placeholder { color: #5c5648; opacity: 1; }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 4px; }
+.chip {
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #2c291c;
+  background: #fffbea;
+  border: 3px solid #e0b03a;
+  border-radius: 26px;
+  min-height: 56px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.chip:active { transform: translateY(2px); }
+.editor-grid { display: block; }
+.preview-lab { margin: 16px 0 8px; font-weight: 800; color: #3d6b34; }
+.topic-line { margin: 0 0 8px; text-align: center; font-weight: 800; color: #5b4a2e; }
+.scene {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  aspect-ratio: 5 / 4;
+  perspective: 1200px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform .55s cubic-bezier(.3, 1.4, .5, 1);
+  transform-style: preserve-3d;
+}
+.card.flipped { transform: rotateY(180deg); }
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 54px 16px 44px;
+  border: 6px solid #fff;
+  box-shadow: 0 10px 0 rgba(61, 58, 47, .12);
+  overflow: hidden;
+}
+.front { background: linear-gradient(160deg, #ffffff, #fff7d6); }
+.back { background: linear-gradient(160deg, #e9fff1, #d4f3ff); transform: rotateY(180deg); }
+.card-text {
+  margin: 0;
+  width: 100%;
+  max-height: 72%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  font-weight: 900;
+  font-size: clamp(36px, 8vw, 60px);
+  line-height: 1.25;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.front .card-text { color: #9a3412; }
+.back .card-text { color: #1d6b45; }
+.card-text.long { font-size: clamp(24px, 5vw, 36px); font-weight: 800; }
+.card-text.placeholder { color: #5c5648; font-weight: 800; font-size: clamp(32px, 7vw, 48px); }
+.hint {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #5c5648;
+}
+.stamp {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  pointer-events: none;
+  font-size: 20px;
+  font-weight: 900;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 3px solid #2f6a3c;
+  color: #2f6a3c;
+  background: rgba(255, 255, 255, .94);
+  transform: rotate(-8deg);
+}
+.stamp.all { border-color: #6a4a12; color: #6a4a12; background: #fff6d8; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.btn {
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 800;
+  min-height: 64px;
+  padding: 10px 16px;
+  border-radius: 18px;
+  cursor: pointer;
+  color: #2c291c;
+  background: #fff;
+  border: 3px solid transparent;
+  touch-action: manipulation;
+}
+.actions .btn { flex: 1 1 160px; }
+.btn.primary {
+  background: #3d6b34;
+  color: #fff;
+  border-color: #3d6b34;
+  box-shadow: 0 5px 0 #2a4d28;
+  font-size: 24px;
+  min-height: 72px;
+}
+.btn.primary:active { transform: translateY(3px); box-shadow: 0 2px 0 #2a4d28; }
+.btn.ghost { border-color: #5f93ad; box-shadow: 0 4px 0 #d5e4ee; }
+.btn.ghost:active { transform: translateY(2px); box-shadow: 0 2px 0 #d5e4ee; }
+.btn.danger { color: #8a3e24; border-color: #e0896b; box-shadow: 0 4px 0 #f3d2c4; }
+.btn.danger:active { transform: translateY(2px); box-shadow: 0 2px 0 #f3d2c4; }
+.btn:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; transform: none; }
+.deck-pos { text-align: center; font-weight: 800; margin: 0 0 8px; }
+.empty {
+  background: #fff;
+  border: 3px dashed #d9cfb3;
+  border-radius: 22px;
+  padding: 20px 16px;
+  text-align: center;
+}
+.empty p { margin: 6px 0; font-weight: 800; }
+.deck-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.deck-row { display: flex; gap: 8px; align-items: stretch; }
+.pick {
+  flex: 1;
+  min-width: 0;
+  min-height: 56px;
+  text-align: left;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2c291c;
+  background: #fff;
+  border: 3px solid #efe6cf;
+  border-radius: 16px;
+  padding: 8px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pick[aria-current="true"] { border-color: #3d6b34; background: #e6f0dc; font-weight: 800; }
+.mini {
+  flex: 0 0 auto;
+  min-height: 56px;
+  min-width: 88px;
+  font-size: 20px;
+  padding: 8px 12px;
+}
+fieldset.checks { border: none; margin: 0; padding: 0; min-inline-size: 0; }
+legend { display: block; width: 100%; padding: 0; margin: 0 0 8px; font-size: 20px; font-weight: 800; }
+.check {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin: 10px 0;
+  padding: 14px;
+  background: #fff;
+  border: 3px solid #efe6cf;
+  border-radius: 18px;
+  cursor: pointer;
+}
+.check.key { border-color: #e0b03a; background: #fffdf6; }
+.check.on { border-color: #8fbf78; background: #f3faef; }
+.check input {
+  width: 28px;
+  height: 28px;
+  margin-top: 4px;
+  flex: 0 0 28px;
+  accent-color: #2f6a3c;
+}
+.check-name { display: block; font-size: 22px; font-weight: 800; }
+.check-tip { display: block; margin-top: 4px; font-size: 20px; color: #5c5648; }
+.key-tag {
+  display: inline-block;
+  margin-left: 6px;
+  font-style: normal;
+  font-size: 18px;
+  font-weight: 800;
+  color: #6a4a12;
+  background: #fff1d6;
+  border-radius: 999px;
+  padding: 2px 8px;
+  vertical-align: 2px;
+}
+.badge-box {
+  margin-top: 14px;
+  background: #fff;
+  border-radius: 22px;
+  padding: 16px;
+  border: 3px dashed #d9cfb3;
+}
+.badge-box.ready { border-style: solid; border-color: #2f6a3c; background: #f3faef; }
+.badge-box.all { border-style: solid; border-color: #c9a227; background: #fff8e4; }
+.badge {
+  display: inline-block;
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 900;
+  padding: 8px 16px;
+  border-radius: 14px;
+  border: 3px solid currentColor;
+  background: #fff;
+}
+.badge.ready { color: #2f6a3c; }
+.badge.all { color: #6a4a12; }
+.badge-box p { margin: 0; }
+footer { text-align: center; color: #5c5648; font-size: 20px; padding: 8px 16px 32px; }
+footer a { color: #1d5c8a; font-weight: 800; }
+.skip {
+  position: absolute;
+  left: 8px;
+  top: -40px;
+  background: #fff;
+  color: #2c291c;
+  padding: 8px 12px;
+  border-radius: 10px;
+  z-index: 30;
+  font-weight: 800;
+}
+.skip:focus { top: 8px; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.is-hidden { display: none !important; }
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 41, 28, .4);
+  z-index: 40;
+}
+.confirm {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 41;
+  max-width: 640px;
+  margin: 0 auto;
+  background: #fff8e4;
+  border: 3px solid #e0b03a;
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: 0 12px 32px rgba(44, 41, 28, .2);
+}
+.confirm p { margin: 0 0 12px; font-weight: 800; font-size: 22px; }
+:focus-visible { outline: 3px solid #0f5f86; outline-offset: 3px; }
+.print-only { display: none; }
+@media (min-width: 720px) {
+  body { font-size: 22px; }
+}
+@media (min-width: 900px) {
+  .editor-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 480px);
+    gap: 20px;
+    align-items: start;
+  }
+  .preview-col { position: sticky; top: 120px; }
+  .preview-lab { margin-top: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
+  .badge { animation: none; }
+}
+@media (forced-colors: active) {
+  .btn, .face, .check, .chip, .pick, .stamp { border: 1px solid ButtonText; }
+}
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body, header, .safety, h1, .sub { background: #fff !important; color: #000 !important; box-shadow: none !important; }
+  .safety { border-bottom: 1pt solid #000; }
+  main { max-width: none; padding: 0; }
+  .print-topic { font-size: 18pt; font-weight: 800; margin: 4mm 0; }
+  .cut-note, .print-foot { font-size: 14pt; margin: 0 0 4mm; }
+  .print-flag {
+    font-size: 16pt;
+    font-weight: 800;
+    border: 1.5pt solid #000;
+    display: inline-block;
+    padding: 2mm 4mm;
+    margin: 0 0 4mm;
+  }
+  .pair {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4mm;
+    margin: 0 0 6mm;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .side {
+    flex: 1 1 68mm;
+    border: 1.5pt solid #000;
+    min-height: 48mm;
+    padding: 4mm;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .side-label {
+    margin: 0;
+    font-size: 14pt;
+    font-weight: 800;
+    border-bottom: .75pt solid #000;
+    padding-bottom: 1mm;
+  }
+  .side .body {
+    margin: 3mm 0 0;
+    font-size: 22pt;
+    font-weight: 800;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .side .body.long { font-size: 16pt; font-weight: 700; }
+}
+@page { margin: 12mm; }
+</style>
+</head>
+<body>
+<div id="page">
+<a class="skip no-print" href="#editor">跳到寫卡</a>
+<div class="safety">🛡️ 唔好輸入真名、學號、學校、地址、相片</div>
+<header>
+  <a class="home no-print" href="../index.html">← 返回課程主頁</a>
+  <h1>🦊 第3節・自製溫習閃卡</h1>
+  <p class="sub">適合小四至小六。自己寫正面同背面，反轉睇答案，再做負責任 AI 八點檢查。</p>
+</header>
+<div class="sticky no-print">
+  <nav class="steps" aria-label="頁面章節">
+    <a class="step" href="#editor"><b>1</b>寫一張卡</a>
+    <a class="step" href="#deck"><b>2</b>我嘅卡</a>
+    <a class="step" href="#check"><b>3</b>八點檢查</a>
+    <a class="step" href="#export"><b>4</b>列印</a>
+  </nav>
+  <div id="status" class="status" role="status"></div>
+</div>
+<main>
+<section id="editor" class="no-print">
+  <h2><span class="sn">1</span>寫一張卡</h2>
+  <div class="panel">
+    <label class="lab" for="topic">標題／主題（可以唔填）
+      <input id="topic" name="card-topic" type="text" maxlength="40" autocomplete="off" placeholder="例如：食物生字、常識第三課">
+    </label>
+    <p class="note">想快啲開始？撳例子，會放入樣本卡。之後可以刪、可以加自己嘅。</p>
+    <div class="chips">
+      <button type="button" class="chip" data-sample="vocab">🍎 英文生字</button>
+      <button type="button" class="chip" data-sample="ai">🛡️ Responsible AI 八點關鍵詞</button>
+    </div>
+    <form id="cardForm" autocomplete="off" novalidate>
+      <div class="editor-grid">
+        <div class="fields">
+          <label class="lab" for="front">正面（問題或者生字）
+            <textarea id="front" name="card-front" maxlength="500" rows="3" autocomplete="off" placeholder="例如：🥕 carrot"></textarea>
+          </label>
+          <label class="lab" for="back">背面（答案）
+            <textarea id="back" name="card-back" maxlength="500" rows="3" autocomplete="off" placeholder="例如：紅蘿蔔"></textarea>
+          </label>
+        </div>
+        <div class="preview-col">
+          <p class="preview-lab">即時預覽（寫緊嘅字會即刻出現）</p>
+          <p class="topic-line is-hidden" id="previewTopic"></p>
+          <div class="scene" id="previewScene" role="button" tabindex="0" aria-pressed="false" aria-label="預覽卡，按一下反轉">
+            <div class="card" id="previewCard" aria-hidden="true">
+              <div class="face front">
+                <span class="stamp preview-stamp is-hidden"></span>
+                <p class="card-text placeholder" id="previewFront">正面</p>
+                <div class="hint" id="previewHintFront">喺上面寫，再按一下反轉</div>
+              </div>
+              <div class="face back">
+                <span class="stamp preview-stamp is-hidden"></span>
+                <p class="card-text placeholder" id="previewBack">背面</p>
+                <div class="hint" id="previewHintBack">👆 再按一下翻返去</div>
+              </div>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn ghost" id="previewFlip" aria-pressed="false">🔄 反轉</button>
+            <button type="submit" class="btn primary" id="addBtn">➕ 加入呢張卡</button>
+          </div>
+          <p class="note" id="addCount">而家 0 / 10 張</p>
+          <p class="note is-hidden" id="limitNote">已經有 10 張。想加新嘅，先喺下面刪走一張。</p>
+          <p class="note">未做檢查都仲可以加入同列印。做完檢查，卡片先會有印章。</p>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section id="deck" class="no-print">
+  <h2><span class="sn">2</span>我嘅卡片 <span class="count" id="deckCount">0 / 10</span></h2>
+  <div class="panel">
+    <p class="note">卡片會記喺呢部裝置，重新整理都仲喺。換一部平板就睇唔到。</p>
+    <div id="deckEmpty" class="empty">
+      <p>未有卡片。</p>
+      <p>寫好正面同背面，撳「加入呢張卡」。或者撳上面嘅例子，即刻有卡可以反轉。</p>
+    </div>
+    <div id="deckStage" class="is-hidden">
+      <p class="topic-line is-hidden" id="deckTopic"></p>
+      <p class="deck-pos" id="deckPos"></p>
+      <div class="scene" id="deckScene" role="button" tabindex="0" aria-pressed="false" aria-label="卡片，按一下反轉">
+        <div class="card" id="deckCard" aria-hidden="true">
+          <div class="face front">
+            <span class="stamp is-hidden"></span>
+            <p class="card-text" id="deckFront"></p>
+            <div class="hint">👆 按一下反轉</div>
+          </div>
+          <div class="face back">
+            <span class="stamp is-hidden"></span>
+            <p class="card-text" id="deckBack"></p>
+            <div class="hint">👆 再按一下翻返去</div>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn ghost" id="prevBtn">◀ 上一張</button>
+        <button type="button" class="btn ghost" id="deckFlip" aria-pressed="false">🔄 反轉</button>
+        <button type="button" class="btn ghost" id="nextBtn">下一張 ▶</button>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn danger" id="deleteBtn">🗑️ 刪除呢張</button>
+        <button type="button" class="btn danger" id="clearBtn">清空全部</button>
+      </div>
+      <h3>全部卡片</h3>
+      <ul id="deckList" class="deck-list" aria-label="卡片列表"></ul>
+    </div>
+  </div>
+</section>
+
+<section id="check" class="no-print">
+  <h2><span class="sn">3</span>負責任 AI 八點檢查</h2>
+  <div class="panel">
+    <fieldset class="checks">
+      <legend>剔一剔先用。有「重要」嘅三項會點亮「可以用」印章。八項都剔，就會變成「完成檢查」。</legend>
+      <label class="check">
+        <input type="checkbox" id="chk-fair" data-id="fair" data-name="公平公正">
+        <span>
+          <span class="check-name">1. 公平公正 — 唔歧視任何人</span>
+          <span class="check-tip">唔好寫低人一等嘅說話，人人都值得被尊重。</span>
+        </span>
+      </label>
+      <label class="check key">
+        <input type="checkbox" id="chk-privacy" data-id="privacy" data-key="1" data-name="私隱保護">
+        <span>
+          <span class="check-name">2. 私隱保護 — 唔放個人資料 <em class="key-tag">重要</em></span>
+          <span class="check-tip">唔好寫真名、學號、學校、電話、地址或者相片。</span>
+        </span>
+      </label>
+      <label class="check key">
+        <input type="checkbox" id="chk-truth" data-id="truth" data-key="1" data-name="真實可靠">
+        <span>
+          <span class="check-name">3. 真實可靠 — 答案要核對過 <em class="key-tag">重要</em></span>
+          <span class="check-tip">中文意思同串法，要同課本或者老師對一次。</span>
+        </span>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="chk-safety" data-id="safety" data-name="安全穩健">
+        <span>
+          <span class="check-name">4. 安全穩健 — 唔教危險行為</span>
+          <span class="check-tip">唔好教人做危險、傷人或者違法嘅事。</span>
+        </span>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="chk-clear" data-id="clear" data-name="透明清楚">
+        <span>
+          <span class="check-name">5. 透明清楚 — 說明內容從邊嚟</span>
+          <span class="check-tip">如果有 AI 幫手，就講聲「用 AI 協助製作」。</span>
+        </span>
+      </label>
+      <label class="check key">
+        <input type="checkbox" id="chk-duty" data-id="duty" data-key="1" data-name="負責任">
+        <span>
+          <span class="check-name">6. 負責任 — 自己檢查先再用 <em class="key-tag">重要</em></span>
+          <span class="check-tip">交出去或者列印之前，自己讀一次正面同背面。</span>
+        </span>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="chk-include" data-id="include" data-name="包容多元">
+        <span>
+          <span class="check-name">7. 包容多元 — 用語友善、顧及唔同同學</span>
+          <span class="check-tip">用大家睇得明、唔會令同學唔開心嘅字。</span>
+        </span>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="chk-human" data-id="human" data-name="以人為本">
+        <span>
+          <span class="check-name">8. 以人為本 — 幫助學習，唔傷害人</span>
+          <span class="check-tip">閃卡用嚟溫習，唔好用嚟抄功課或者整蠱人。</span>
+        </span>
+      </label>
+    </fieldset>
+    <div class="badge-box" id="badgeBox">
+      <p class="badge is-hidden" id="badgeMark"></p>
+      <p id="badgeHelp">仲未有印章。請剔「私隱保護」「真實可靠」「負責任」，就會顯示「可以用」。未剔都仲可以寫卡同列印。</p>
+    </div>
+    <p id="badgeLive" class="sr-only" aria-live="polite"></p>
+  </div>
+</section>
+
+<section id="export">
+  <h2 class="no-print"><span class="sn">4</span>列印同下載</h2>
+  <div class="panel no-print">
+    <p class="note">列印時每張卡會有正面同背面，可以剪出嚟。下載唔使登入，檔案留喺呢部裝置。</p>
+    <div class="actions no-print">
+      <button type="button" class="btn primary" id="printBtn">🖨️ 列印閃卡</button>
+      <button type="button" class="btn ghost" id="txtBtn">📄 下載文字</button>
+      <button type="button" class="btn ghost" id="jsonBtn">下載 JSON</button>
+    </div>
+  </div>
+  <div id="printSheet" class="print-only"></div>
+</section>
+</main>
+<footer class="no-print">
+  <p>⭐ 自己整卡，自己檢查。AI 都會錯，記得同課本或者老師核對。</p>
+  <p><a href="../index.html">← 返回課程主頁</a></p>
+</footer>
+</div>
+
+<div id="confirmBack" class="backdrop no-print is-hidden"></div>
+<div id="confirmBar" class="confirm no-print is-hidden" role="alertdialog" aria-modal="true" aria-labelledby="confirmText">
+  <p id="confirmText" tabindex="-1"></p>
+  <div class="actions">
+    <button type="button" class="btn primary" id="confirmYes">確定</button>
+    <button type="button" class="btn ghost" id="confirmNo">取消</button>
+  </div>
+</div>
+<noscript><p class="safety">請開啟 JavaScript，先用到自製閃卡。</p></noscript>
+<script>
+(function () {
+  /* localStorage: canvas-kids-maker-v1
+     印章：私隱保護 + 真實可靠 + 負責任 → 可以用；八項全剔 → 完成檢查。
+     未齊都仲可以加卡、反轉同列印。 */
+  var STORAGE_KEY = "canvas-kids-maker-v1";
+  var MAX_CARDS = 10;
+  var SAMPLES = {
+    vocab: {
+      topic: "英文生字・食物",
+      cards: [
+        ["🥕\ncarrot", "紅蘿蔔\nRabbits like to eat carrots."],
+        ["🥦\nbroccoli", "西蘭花\nBroccoli is a green vegetable."],
+        ["🍉\nwatermelon", "西瓜\nWe eat watermelon in summer."],
+        ["🍜\nnoodles", "麵條\nI eat noodles for lunch."],
+        ["🥟\ndumpling", "餃子\nMy grandma makes dumplings."]
+      ]
+    },
+    ai: {
+      topic: "負責任 AI 八點",
+      cards: [
+        ["公平公正", "唔歧視任何人。\n唔好寫低人一等嘅說話，人人都值得被尊重。"],
+        ["私隱保護", "唔放個人資料。\n唔好寫真名、學號、學校、電話、地址或者相片。"],
+        ["真實可靠", "答案要核對過。\n中文意思同串法，要同課本或者老師對一次。"],
+        ["安全穩健", "唔教危險行為。\n唔好教人做危險、傷人或者違法嘅事。"],
+        ["透明清楚", "說明內容從邊嚟。\n如果有 AI 幫手，就講聲「用 AI 協助製作」。"],
+        ["負責任", "自己檢查先再用。\n交出去或者列印之前，自己讀一次正面同背面。"],
+        ["包容多元", "用語友善、顧及唔同同學。\n用大家睇得明、唔會令同學唔開心嘅字。"],
+        ["以人為本", "幫助學習，唔傷害人。\n閃卡用嚟溫習，唔好用嚟抄功課或者整蠱人。"]
+      ]
+    }
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var page = $("page");
+  var topicEl = $("topic");
+  var frontEl = $("front");
+  var backEl = $("back");
+  var boxes = Array.prototype.slice.call(document.querySelectorAll(".check input"));
+  var keyBoxes = boxes.filter(function (b) { return b.dataset.key === "1"; });
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var state = {
+    topic: "",
+    checks: {},
+    cards: [],
+    index: 0,
+    previewFlipped: false,
+    deckFlipped: false
+  };
+  var badgeLevel = "";
+  var storageOff = false;
+  var toldStorage = false;
+  var hadStore = false;
+  var pendingYes = null;
+  var returnFocus = null;
+
+  function uid() {
+    return "c" + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+  }
+  function topicText() { return topicEl.value.trim(); }
+  function shorten(text, n) {
+    var s = String(text || "").replace(/\s+/g, " ").trim();
+    return s.length > n ? s.slice(0, n) + "…" : s;
+  }
+  function say(msg, kind) {
+    var el = $("status");
+    el.classList.remove("ok", "warn");
+    el.classList.add(kind === "warn" ? "warn" : "ok");
+    el.textContent = msg;
+  }
+  function currentBadge() {
+    var keyOk = keyBoxes.every(function (b) { return !!state.checks[b.dataset.id]; });
+    var allOk = boxes.every(function (b) { return !!state.checks[b.dataset.id]; });
+    if (allOk) return "all";
+    if (keyOk) return "ready";
+    return "none";
+  }
+  function badgeWord() {
+    var level = currentBadge();
+    if (level === "all") return "完成檢查";
+    if (level === "ready") return "可以用";
+    return "未完成檢查";
+  }
+  function setFace(el, text, placeholder) {
+    var value = text || placeholder;
+    el.textContent = value;
+    el.classList.toggle("placeholder", !text);
+    var lines = String(value).split("\n");
+    el.classList.toggle("long", !!text && (text.length > 28 || lines.length > 2));
+  }
+  function bindFlip(scene, button, isFlipped, setFlipped, paint) {
+    function toggle() {
+      setFlipped(!isFlipped());
+      paint();
+    }
+    scene.addEventListener("click", toggle);
+    scene.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggle();
+      }
+    });
+    button.addEventListener("click", toggle);
+  }
+
+  function load() {
+    var raw = null;
+    try { raw = localStorage.getItem(STORAGE_KEY); }
+    catch (e) { storageOff = true; return; }
+    if (!raw) return;
+    hadStore = true;
+    try {
+      var data = JSON.parse(raw);
+      if (data && typeof data.topic === "string") state.topic = data.topic.slice(0, 40);
+      if (data && typeof data.draftFront === "string") frontEl.value = data.draftFront.slice(0, 500);
+      if (data && typeof data.draftBack === "string") backEl.value = data.draftBack.slice(0, 500);
+      if (data && data.checks && typeof data.checks === "object") state.checks = data.checks;
+      if (data && Array.isArray(data.cards)) {
+        data.cards.forEach(function (c) {
+          if (!c || typeof c.front !== "string" || typeof c.back !== "string") return;
+          var f = c.front.trim().slice(0, 500);
+          var b = c.back.trim().slice(0, 500);
+          if (!f || !b || state.cards.length >= MAX_CARDS) return;
+          state.cards.push({ id: uid(), front: f, back: b });
+        });
+      }
+    } catch (e) { /* ignore broken saves */ }
+  }
+  function persist() {
+    var cleanChecks = {};
+    boxes.forEach(function (b) { cleanChecks[b.dataset.id] = !!state.checks[b.dataset.id]; });
+    state.checks = cleanChecks;
+    var data = {
+      version: 1,
+      topic: topicEl.value.slice(0, 40),
+      draftFront: frontEl.value.slice(0, 500),
+      draftBack: backEl.value.slice(0, 500),
+      checks: cleanChecks,
+      cards: state.cards.map(function (c) { return { front: c.front, back: c.back }; })
+    };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    catch (e) {
+      storageOff = true;
+      if (!toldStorage) {
+        toldStorage = true;
+        say("呢部瀏覽器未能儲存，重新整理可能會失去卡片。", "warn");
+      }
+    }
+  }
+  function payload() {
+    var checks = {};
+    boxes.forEach(function (b) { checks[b.dataset.name] = !!b.checked; });
+    return {
+      version: 1,
+      topic: topicText(),
+      badge: badgeWord(),
+      checks: checks,
+      cards: state.cards.map(function (c) { return { front: c.front, back: c.back }; })
+    };
+  }
+  function toText(data) {
+    var lines = [];
+    lines.push("主題：" + (data.topic || "（未填）"));
+    lines.push("印章：" + data.badge);
+    lines.push("卡片：" + data.cards.length);
+    lines.push("");
+    data.cards.forEach(function (c, i) {
+      lines.push("--- 第 " + (i + 1) + " 張 ---");
+      lines.push("正面：");
+      lines.push(c.front);
+      lines.push("背面：");
+      lines.push(c.back);
+      lines.push("");
+    });
+    lines.push("八點檢查：");
+    Object.keys(data.checks).forEach(function (name) {
+      lines.push((data.checks[name] ? "☑ " : "☐ ") + name);
+    });
+    lines.push("");
+    lines.push("請同課本或者老師核對答案。唔好寫低個人資料。");
+    return lines.join("\n");
+  }
+  function download(filename, mime, text) {
+    try {
+      var blob = new Blob([text], { type: mime });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+      return true;
+    } catch (e) {
+      say("下載未成功，可以改用列印。", "warn");
+      return false;
+    }
+  }
+  function renderTopicLines() {
+    var t = topicText();
+    document.querySelectorAll(".topic-line").forEach(function (el) {
+      el.textContent = t ? "主題：" + t : "";
+      el.classList.toggle("is-hidden", !t);
+    });
+  }
+  function renderPreview() {
+    var front = frontEl.value.trim();
+    var back = backEl.value.trim();
+    setFace($("previewFront"), front, "正面");
+    setFace($("previewBack"), back, "背面");
+    $("previewHintFront").textContent = front ? "👆 按一下反轉" : "喺上面寫，再按一下反轉";
+    $("previewCard").classList.toggle("flipped", state.previewFlipped);
+    var side = state.previewFlipped ? "背面" : "正面";
+    var shown = state.previewFlipped ? back : front;
+    var suffix = currentBadge() === "all" ? "，印章完成檢查" : currentBadge() === "ready" ? "，印章可以用" : "";
+    $("previewScene").setAttribute("aria-pressed", state.previewFlipped ? "true" : "false");
+    $("previewFlip").setAttribute("aria-pressed", state.previewFlipped ? "true" : "false");
+    $("previewScene").setAttribute("aria-label", (shown ? side + "：" + shown.replace(/\s+/g, " ") : "預覽未有字") + suffix + "。按一下反轉。");
+    var showDraftStamp = currentBadge() !== "none" && !!(front || back);
+    document.querySelectorAll(".preview-stamp").forEach(function (el) {
+      el.classList.toggle("is-hidden", !showDraftStamp);
+    });
+    renderTopicLines();
+  }
+  function renderDeckChrome() {
+    var n = state.cards.length;
+    if (state.index >= n) state.index = Math.max(0, n - 1);
+    if (state.index < 0) state.index = 0;
+    $("deckCount").textContent = n + " / " + MAX_CARDS;
+    $("addCount").textContent = "而家 " + n + " / " + MAX_CARDS + " 張";
+    $("addBtn").disabled = n >= MAX_CARDS;
+    $("limitNote").classList.toggle("is-hidden", n < MAX_CARDS);
+    $("deckEmpty").classList.toggle("is-hidden", n > 0);
+    $("deckStage").classList.toggle("is-hidden", n === 0);
+    $("prevBtn").disabled = n === 0 || state.index <= 0;
+    $("nextBtn").disabled = n === 0 || state.index >= n - 1;
+    $("deleteBtn").disabled = n === 0;
+    $("clearBtn").disabled = n === 0;
+    if (!n) {
+      state.deckFlipped = false;
+      renderTopicLines();
+      return;
+    }
+    var card = state.cards[state.index];
+    setFace($("deckFront"), card.front, "正面");
+    setFace($("deckBack"), card.back, "背面");
+    $("deckCard").classList.toggle("flipped", state.deckFlipped);
+    $("deckPos").textContent = "第 " + (state.index + 1) + " / " + n + " 張";
+    var side = state.deckFlipped ? "背面" : "正面";
+    var shown = state.deckFlipped ? card.back : card.front;
+    var suffix = currentBadge() === "all" ? "，印章完成檢查" : currentBadge() === "ready" ? "，印章可以用" : "";
+    $("deckScene").setAttribute("aria-pressed", state.deckFlipped ? "true" : "false");
+    $("deckFlip").setAttribute("aria-pressed", state.deckFlipped ? "true" : "false");
+    $("deckScene").setAttribute("aria-label", side + "：" + shown.replace(/\s+/g, " ") + suffix + "。按一下反轉。");
+    $("deckList").querySelectorAll("[data-pick]").forEach(function (btn) {
+      if (btn.dataset.pick === card.id) btn.setAttribute("aria-current", "true");
+      else btn.removeAttribute("aria-current");
+    });
+    renderTopicLines();
+  }
+  function buildList() {
+    var list = $("deckList");
+    list.replaceChildren();
+    state.cards.forEach(function (card, i) {
+      var li = document.createElement("li");
+      li.className = "deck-row";
+      var pick = document.createElement("button");
+      pick.type = "button";
+      pick.className = "pick";
+      pick.dataset.pick = card.id;
+      pick.textContent = (i + 1) + ". " + shorten(card.front, 42);
+      pick.setAttribute("aria-label", "睇第 " + (i + 1) + " 張：" + shorten(card.front, 80));
+      if (i === state.index) pick.setAttribute("aria-current", "true");
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "btn danger mini";
+      del.dataset.del = card.id;
+      del.textContent = "刪除";
+      del.setAttribute("aria-label", "刪除第 " + (i + 1) + " 張");
+      li.appendChild(pick);
+      li.appendChild(del);
+      list.appendChild(li);
+    });
+  }
+  function updateBadge(announce) {
+    var level = currentBadge();
+    var changed = level !== badgeLevel;
+    badgeLevel = level;
+    document.querySelectorAll(".stamp").forEach(function (el) {
+      var show = level !== "none";
+      el.classList.toggle("is-hidden", !show);
+      el.classList.toggle("all", level === "all");
+      if (show) el.textContent = level === "all" ? "完成檢查" : "可以用";
+    });
+    var mark = $("badgeMark");
+    var box = $("badgeBox");
+    box.classList.remove("ready", "all");
+    if (level === "none") {
+      mark.className = "badge is-hidden";
+      mark.textContent = "";
+      var missing = keyBoxes.filter(function (b) { return !state.checks[b.dataset.id]; }).map(function (b) { return b.dataset.name; });
+      $("badgeHelp").textContent = "仲未有印章。請再剔：" + missing.join("、") + "。剔齊私隱保護、真實可靠、負責任，就會顯示「可以用」。未剔都仲可以寫卡同列印。";
+    } else if (level === "ready") {
+      box.classList.add("ready");
+      mark.className = "badge ready";
+      mark.textContent = "可以用";
+      $("badgeHelp").textContent = "私隱、真實、負責都剔咗，呢副卡可以用。如果八點都剔齊，印章會變成「完成檢查」。";
+    } else {
+      box.classList.add("all");
+      mark.className = "badge all";
+      mark.textContent = "完成檢查";
+      $("badgeHelp").textContent = "八點都檢查好。印章係「完成檢查」，可以安心用嚟溫習。";
+    }
+    if (announce && changed) {
+      $("badgeLive").textContent = level === "all" ? "印章：完成檢查" : level === "ready" ? "印章：可以用" : "印章收起咗";
+    }
+    renderPreview();
+    renderDeckChrome();
+  }
+  function renderPrint() {
+    var sheet = $("printSheet");
+    var level = currentBadge();
+    sheet.replaceChildren();
+    var topic = document.createElement("p");
+    topic.className = "print-topic";
+    topic.textContent = topicText() ? "主題：" + topicText() : "我嘅溫習閃卡";
+    var flag = document.createElement("p");
+    flag.className = "print-flag";
+    if (level === "all") flag.textContent = "完成檢查";
+    else if (level === "ready") flag.textContent = "可以用";
+    else flag.textContent = "記得剔：私隱保護、真實可靠、負責任";
+    var cut = document.createElement("p");
+    cut.className = "cut-note";
+    cut.textContent = "沿住框線剪開。每組左邊係正面，右邊係背面。";
+    sheet.appendChild(topic);
+    sheet.appendChild(flag);
+    sheet.appendChild(cut);
+    if (!state.cards.length) {
+      var empty = document.createElement("p");
+      empty.textContent = "未有卡片";
+      sheet.appendChild(empty);
+    } else {
+      state.cards.forEach(function (card, i) {
+        var pair = document.createElement("div");
+        pair.className = "pair";
+        ["正面", "背面"].forEach(function (label, idx) {
+          var text = idx === 0 ? card.front : card.back;
+          var side = document.createElement("div");
+          side.className = "side";
+          var cap = document.createElement("p");
+          cap.className = "side-label";
+          cap.textContent = label + " · 第 " + (i + 1) + " 張";
+          var body = document.createElement("p");
+          body.className = "body" + ((text.length > 40 || text.split("\n").length > 2) ? " long" : "");
+          body.textContent = text;
+          side.appendChild(cap);
+          side.appendChild(body);
+          pair.appendChild(side);
+        });
+        sheet.appendChild(pair);
+      });
+    }
+    var foot = document.createElement("p");
+    foot.className = "print-foot";
+    foot.textContent = "AI 都會錯。中文意思同串法，請同課本或者老師核對。唔好寫低個人資料。";
+    sheet.appendChild(foot);
+  }
+  function addCard() {
+    var front = frontEl.value.trim();
+    var back = backEl.value.trim();
+    if (!front || !back) {
+      say("正面同背面都要有字，先至加入得。", "warn");
+      if (!front) frontEl.focus();
+      else backEl.focus();
+      return;
+    }
+    if (state.cards.length >= MAX_CARDS) {
+      say("已經有 10 張。想加新嘅，先刪走一張。", "warn");
+      return;
+    }
+    state.cards.push({ id: uid(), front: front, back: back });
+    state.index = state.cards.length - 1;
+    state.deckFlipped = false;
+    frontEl.value = "";
+    backEl.value = "";
+    state.previewFlipped = false;
+    persist();
+    buildList();
+    renderPreview();
+    renderDeckChrome();
+    renderPrint();
+    say(state.cards.length >= MAX_CARDS ? "已加入第 10 張。已經滿咗，想再加要先刪一張。" : "已加入第 " + state.cards.length + " 張。", "ok");
+    frontEl.focus();
+  }
+  function deleteAt(i) {
+    if (i < 0 || i >= state.cards.length) return;
+    var removed = state.cards.splice(i, 1)[0];
+    if (i < state.index) state.index -= 1;
+    if (state.index >= state.cards.length) state.index = Math.max(0, state.cards.length - 1);
+    state.deckFlipped = false;
+    persist();
+    buildList();
+    renderDeckChrome();
+    renderPrint();
+    say("已刪除「" + shorten(removed.front, 18) + "」。", "ok");
+    if (!state.cards.length) frontEl.focus();
+    else {
+      var again = $("deckList").querySelector('[data-pick="' + state.cards[state.index].id + '"]');
+      if (again) again.focus();
+    }
+  }
+  function loadSample(kind, trigger) {
+    var pack = SAMPLES[kind];
+    if (!pack) return;
+    topicEl.value = pack.topic;
+    state.cards = pack.cards.map(function (pair) {
+      return { id: uid(), front: pair[0], back: pair[1] };
+    });
+    state.index = 0;
+    state.deckFlipped = false;
+    persist();
+    buildList();
+    renderPreview();
+    renderDeckChrome();
+    renderPrint();
+    say("已放入「" + trigger.textContent.trim() + "」例子，共 " + state.cards.length + " 張。你可以改，亦可以加。", "ok");
+    $("deck").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  }
+  function setModal(open) {
+    $("confirmBack").classList.toggle("is-hidden", !open);
+    $("confirmBar").classList.toggle("is-hidden", !open);
+    if ("inert" in page) page.inert = open;
+    document.body.style.overflow = open ? "hidden" : "";
+  }
+  function closeAsk() {
+    var back = returnFocus;
+    pendingYes = null;
+    returnFocus = null;
+    setModal(false);
+    if (back && document.contains(back) && typeof back.focus === "function") back.focus();
+  }
+  function openAsk(message, onYes, trigger) {
+    pendingYes = onYes;
+    returnFocus = trigger || document.activeElement;
+    $("confirmText").textContent = message;
+    setModal(true);
+    $("confirmText").focus();
+  }
+  function needCards(actionName) {
+    if (state.cards.length) return true;
+    say("未有卡片可以" + actionName + "。先加入至少一張卡。", "warn");
+    return false;
+  }
+
+  load();
+  topicEl.value = state.topic;
+  var clean = {};
+  boxes.forEach(function (b) { clean[b.dataset.id] = !!state.checks[b.dataset.id]; });
+  state.checks = clean;
+  boxes.forEach(function (box) {
+    box.checked = !!state.checks[box.dataset.id];
+    box.closest(".check").classList.toggle("on", box.checked);
+    box.addEventListener("change", function () {
+      state.checks[box.dataset.id] = box.checked;
+      box.closest(".check").classList.toggle("on", box.checked);
+      persist();
+      updateBadge(true);
+      renderPrint();
+    });
+  });
+  buildList();
+  updateBadge(false);
+  renderPrint();
+  if (hadStore) persist();
+  if (storageOff) say("呢部瀏覽器未能儲存，重新整理可能會失去卡片。", "warn");
+
+  topicEl.addEventListener("input", function () {
+    if (topicEl.value.length > 40) topicEl.value = topicEl.value.slice(0, 40);
+    persist();
+    renderTopicLines();
+    renderPrint();
+  });
+  frontEl.addEventListener("input", function () { renderPreview(); persist(); });
+  backEl.addEventListener("input", function () { renderPreview(); persist(); });
+  $("cardForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    addCard();
+  });
+  bindFlip($("previewScene"), $("previewFlip"), function () { return state.previewFlipped; }, function (v) { state.previewFlipped = v; }, renderPreview);
+  bindFlip($("deckScene"), $("deckFlip"), function () { return state.deckFlipped; }, function (v) { state.deckFlipped = v; }, renderDeckChrome);
+
+  $("prevBtn").addEventListener("click", function () {
+    if (state.index <= 0) return;
+    state.index -= 1;
+    state.deckFlipped = false;
+    renderDeckChrome();
+    $("deckScene").scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+  });
+  $("nextBtn").addEventListener("click", function () {
+    if (state.index >= state.cards.length - 1) return;
+    state.index += 1;
+    state.deckFlipped = false;
+    renderDeckChrome();
+    $("deckScene").scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+  });
+  $("deleteBtn").addEventListener("click", function () {
+    if (!state.cards.length) return;
+    deleteAt(state.index);
+  });
+  $("clearBtn").addEventListener("click", function () {
+    if (!state.cards.length) return;
+    openAsk("清走全部卡片？寫低嘅字會不見，八點檢查會保留。", function () {
+      state.cards = [];
+      state.index = 0;
+      state.deckFlipped = false;
+      persist();
+      buildList();
+      renderDeckChrome();
+      renderPrint();
+      say("已清空全部卡片。", "ok");
+    }, $("clearBtn"));
+  });
+  $("deckList").addEventListener("click", function (e) {
+    var del = e.target.closest("[data-del]");
+    var pick = e.target.closest("[data-pick]");
+    if (del) {
+      deleteAt(state.cards.findIndex(function (c) { return c.id === del.dataset.del; }));
+      return;
+    }
+    if (!pick) return;
+    var i = state.cards.findIndex(function (c) { return c.id === pick.dataset.pick; });
+    if (i < 0) return;
+    state.index = i;
+    state.deckFlipped = false;
+    renderDeckChrome();
+    $("deckScene").scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+  });
+  document.querySelectorAll("[data-sample]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var kind = btn.dataset.sample;
+      var run = function () { loadSample(kind, btn); };
+      if (state.cards.length) openAsk("用例子取代而家嘅卡片同主題？八點檢查會保留。", run, btn);
+      else run();
+    });
+  });
+  $("confirmYes").addEventListener("click", function () {
+    var fn = pendingYes;
+    pendingYes = null;
+    returnFocus = null;
+    setModal(false);
+    if (fn) fn();
+  });
+  $("confirmNo").addEventListener("click", closeAsk);
+  $("confirmBack").addEventListener("click", closeAsk);
+  document.addEventListener("keydown", function (e) {
+    if ($("confirmBar").classList.contains("is-hidden")) return;
+    if (e.key === "Escape") { e.preventDefault(); closeAsk(); return; }
+    if (e.key !== "Tab") return;
+    var nodes = [$("confirmText"), $("confirmYes"), $("confirmNo")];
+    var first = nodes[0];
+    var last = nodes[nodes.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  $("printBtn").addEventListener("click", function () {
+    if (!needCards("列印")) return;
+    renderPrint();
+    window.print();
+  });
+  window.addEventListener("beforeprint", renderPrint);
+  $("txtBtn").addEventListener("click", function () {
+    if (!needCards("下載")) return;
+    if (download("flashcards.txt", "text/plain;charset=utf-8", "\uFEFF" + toText(payload()))) {
+      say("已下載文字檔。", "ok");
+    }
+  });
+  $("jsonBtn").addEventListener("click", function () {
+    if (!needCards("下載")) return;
+    if (download("flashcards.json", "application/json;charset=utf-8", JSON.stringify(payload(), null, 2) + "\n")) {
+      say("已下載 JSON。", "ok");
+    }
+  });
+})();
+</script>
+</body>
+</html>
