@@ -8,6 +8,7 @@
 <title>第3節・自製溫習閃卡</title>
 <style>
 :root { color-scheme: light; }
+html { scroll-padding-top: 96px; }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
   margin: 0;
@@ -82,7 +83,7 @@ h1 { margin: 0; font-size: clamp(28px, 7vw, 40px); color: #3d6b34; line-height: 
 .status.ok:not(:empty) { background: #e6f0dc; color: #1f4d3a; }
 .status.warn:not(:empty) { background: #fff1d6; color: #2c291c; }
 main { max-width: 980px; margin: 0 auto; padding: 8px 16px 40px; }
-section { scroll-margin-top: 130px; }
+section { scroll-margin-top: 0; }
 h2 {
   font-size: 28px;
   color: #5b4a2e;
@@ -746,11 +747,17 @@ footer a { color: #1d5c8a; font-weight: 800; }
     var s = String(text || "").replace(/\s+/g, " ").trim();
     return s.length > n ? s.slice(0, n) + "…" : s;
   }
+  function syncScrollPad() {
+    var bar = document.querySelector(".sticky");
+    if (!bar) return;
+    document.documentElement.style.scrollPaddingTop = (bar.offsetHeight + 16) + "px";
+  }
   function say(msg, kind) {
     var el = $("status");
     el.classList.remove("ok", "warn");
     el.classList.add(kind === "warn" ? "warn" : "ok");
     el.textContent = msg;
+    syncScrollPad();
   }
   function currentBadge() {
     var keyOk = keyBoxes.every(function (b) { return !!state.checks[b.dataset.id]; });
@@ -1158,6 +1165,8 @@ footer a { color: #1d5c8a; font-weight: 800; }
   renderPrint();
   if (hadStore) persist();
   if (storageOff) say("呢部瀏覽器未能儲存，重新整理可能會失去卡片。", "warn");
+  syncScrollPad();
+  window.addEventListener("resize", syncScrollPad);
 
   topicEl.addEventListener("input", function () {
     if (topicEl.value.length > 40) topicEl.value = topicEl.value.slice(0, 40);
