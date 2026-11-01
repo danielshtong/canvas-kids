@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="第4節：AI 學習任務包。幫同學複習一個課題，做插圖或海報、複習閃卡，同負責任 AI 八點自評。">
+<meta name="color-scheme" content="light">
+<title>第4節・AI 學習任務包</title>
+<style>
+:root { color-scheme: light; }
+html { scroll-padding-top: 150px; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
+  background: linear-gradient(#dcefe9, #fbf6ea 320px);
+  color: #2c291c;
+  font-size: 20px;
+  line-height: 1.55;
+}
+.safety {
+  background: #fff1d6;
+  border-bottom: 3px solid #e0b03a;
+  text-align: center;
+  padding: 12px 16px;
+  font-weight: 800;
+  font-size: 20px;
+}
+header { text-align: center; padding: 18px 16px 8px; }
+h1 { margin: 0; font-size: clamp(28px, 7vw, 40px); color: #3d6b34; line-height: 1.25; }
+.sub { color: #5c5648; margin: 8px 0 0; }
+.home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin: 0 8px 8px;
+  color: #1d5c8a;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: rgba(251, 246, 234, .96);
+  border-bottom: 2px dashed #d9cfb3;
+}
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 12px 16px;
+}
+.step {
+  background: #fffdf7;
+  border: 3px solid #8fbcd4;
+  border-radius: 18px;
+  padding: 8px 14px;
+  font-weight: 800;
+  font-size: 20px;
+  text-decoration: none;
+  color: #2c291c;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+}
+.step b {
+  background: #1d5c8a;
+  color: #fff;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  flex: 0 0 auto;
+}
+a.step:hover { background: #eef6e8; }
+.status { margin: 0; padding: 0 16px; font-weight: 800; font-size: 20px; }
+.status:not(:empty) { padding: 10px 16px 12px; }
+.status.progress:not(:empty) { background: #e7f3f8; color: #1d3c4f; }
+.status.done:not(:empty) { background: #fff8e4; color: #3d3420; }
+.status.ok:not(:empty) { background: #e6f0dc; color: #1f4d3a; }
+.status.warn:not(:empty) { background: #fff1d6; color: #2c291c; }
+main { max-width: 800px; margin: 0 auto; padding: 8px 16px 40px; }
+h2 {
+  font-size: 28px;
+  color: #5b4a2e;
+  margin: 28px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+h3 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  color: #5b4a2e;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sn {
+  background: #e6f0dc;
+  color: #2f6a3c;
+  border-radius: 14px;
+  min-width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+.panel, .step-card, .sheet {
+  background: #fffdf7;
+  border: 2px solid #efe6cf;
+  border-radius: 22px;
+  padding: 14px 16px 18px;
+  box-shadow: 0 4px 0 #e6dcc2;
+}
+.mission-line {
+  margin: 0 0 10px;
+  font-size: 24px;
+  font-weight: 800;
+  color: #3d3420;
+}
+.mission-line strong { display: block; color: #3d6b34; }
+.note { margin: 8px 0; color: #5c5648; }
+.nowrap { white-space: nowrap; }
+.howto ol { margin: 8px 0; padding-left: 1.4em; }
+.howto li { margin: 4px 0; }
+.pass-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.step-card { border-width: 3px; border-top: 8px solid var(--accent, #e0896b); }
+.accent-art { --accent: #e0896b; }
+.accent-cards { --accent: #5f93ad; }
+.accent-rai { --accent: #e0b03a; }
+.step-card.done { border-color: #2f6a3c; background: #f7fbf4; }
+.lab { display: block; font-weight: 800; font-size: 22px; margin-top: 14px; }
+.lab input, .lab textarea {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  font: inherit;
+  font-size: 22px;
+  line-height: 1.45;
+  padding: 12px 14px;
+  border: 3px solid #d9cfb3;
+  border-radius: 14px;
+  background: #fff;
+  color: #2c291c;
+}
+.lab textarea { min-height: 96px; resize: vertical; }
+.lab input:focus, .lab textarea:focus { outline: none; border-color: #1d5c8a; }
+::placeholder { color: #5c5648; opacity: 1; }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 4px; }
+.chip {
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #2c291c;
+  background: #fffbea;
+  border: 3px solid #e0b03a;
+  border-radius: 26px;
+  min-height: 56px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.chip.on { background: #e0b03a; }
+.chip:active { transform: translateY(2px); }
+.preview-lab { margin: 14px 0 8px; font-weight: 800; color: #3d6b34; }
+.prompt {
+  margin: 0;
+  background: #f1f8ec;
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 2px dashed #6f9a5b;
+  font-size: 22px;
+  font-weight: 700;
+}
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.btn {
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: #2c291c;
+  background: #fff;
+  border: 3px solid #d9cfb3;
+  border-radius: 18px;
+  min-height: 64px;
+  padding: 10px 16px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #e6dcc2;
+  flex: 1 1 200px;
+  min-width: 0;
+  max-width: 100%;
+}
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #e6dcc2; }
+.btn.primary {
+  background: #3d6b34;
+  color: #fff;
+  border-color: #3d6b34;
+  box-shadow: 0 5px 0 #2a4d28;
+}
+.btn.primary:active { transform: translateY(3px); box-shadow: 0 2px 0 #2a4d28; }
+.btn.ghost { border-color: #5f93ad; box-shadow: 0 4px 0 #d5e4ee; }
+.btn.ghost:active { transform: translateY(2px); box-shadow: 0 2px 0 #d5e4ee; }
+.btn.danger { color: #8a3e24; border-color: #e0896b; box-shadow: 0 4px 0 #f3d2c4; }
+.btn.danger:active { transform: translateY(2px); box-shadow: 0 2px 0 #f3d2c4; }
+fieldset.checks { border: none; margin: 12px 0 0; padding: 0; min-inline-size: 0; }
+legend { display: block; width: 100%; padding: 0; margin: 0 0 8px; font-size: 20px; font-weight: 800; }
+.check {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin: 10px 0;
+  padding: 14px;
+  background: #fff;
+  border: 3px solid #efe6cf;
+  border-radius: 18px;
+  cursor: pointer;
+}
+.check.key { border-color: #e0b03a; background: #fffdf6; }
+.check.on { border-color: #8fbf78; background: #f3faef; }
+.check input {
+  width: 32px;
+  height: 32px;
+  margin-top: 4px;
+  flex: 0 0 32px;
+  accent-color: #2f6a3c;
+}
+.check-name { display: block; font-size: 22px; font-weight: 800; }
+.check-tip { display: block; margin-top: 4px; font-size: 20px; color: #5c5648; }
+.key-tag {
+  display: inline-block;
+  margin-left: 6px;
+  font-style: normal;
+  font-size: 18px;
+  font-weight: 800;
+  color: #6a4a12;
+  background: #fff1d6;
+  border-radius: 999px;
+  padding: 2px 8px;
+  vertical-align: 2px;
+}
+.badge-box {
+  margin-top: 14px;
+  background: #fff;
+  border-radius: 22px;
+  padding: 16px;
+  border: 3px dashed #d9cfb3;
+}
+.badge-box.ready { border-style: solid; border-color: #2f6a3c; background: #f3faef; }
+.badge-box.all { border-style: solid; border-color: #c9a227; background: #fff8e4; }
+.badge {
+  display: inline-block;
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 900;
+  padding: 8px 16px;
+  border-radius: 14px;
+  border: 3px solid currentColor;
+  background: #fff;
+}
+.badge.ready { color: #2f6a3c; }
+.badge.all { color: #6a4a12; }
+.badge-box p { margin: 0; }
+.bar { display: flex; gap: 6px; margin: 0 0 12px; }
+.bar span { flex: 1; height: 16px; border-radius: 999px; background: #efe6cf; }
+.bar span.on { background: #3d6b34; }
+.pips { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pips li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 20px;
+  background: #fff;
+  border: 3px solid #efe6cf;
+  border-radius: 16px;
+  padding: 8px 12px;
+  min-height: 56px;
+}
+.pip {
+  flex: 0 0 auto;
+  min-width: 7.2em;
+  text-align: center;
+  font-weight: 900;
+  background: #fff1d6;
+  color: #3d3420;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+.pip.on { background: #3d6b34; color: #fff; }
+.pip.all { background: #c9a227; color: #2c291c; }
+.cheer-text { margin: 12px 0 0; font-weight: 800; }
+#cheer[data-done="true"] { background: #fff8e4; border-color: #e0b03a; }
+#cheer[data-done="true"] .cheer-text { font-size: 26px; font-weight: 900; color: #3d3420; }
+.save-warn {
+  background: #fff1d6;
+  border: 3px solid #e0b03a;
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-weight: 800;
+}
+.sheet-title { margin: 0 0 8px; font-size: 26px; font-weight: 900; color: #3d6b34; }
+.sheet-row { margin: 10px 0; }
+.k { display: block; font-size: 18px; font-weight: 800; color: #5b4a2e; }
+.val { display: block; font-size: 22px; font-weight: 800; white-space: pre-wrap; overflow-wrap: anywhere; }
+.val.empty-val { color: #5c5648; font-weight: 700; }
+.sheet h3 { margin: 16px 0 8px; }
+.sheet-list { margin: 0; padding-left: 1.2em; }
+.sheet-list li { margin: 4px 0; font-weight: 700; overflow-wrap: anywhere; }
+.sheet-foot { margin: 16px 0 0; color: #5c5648; font-size: 18px; overflow-wrap: anywhere; }
+.prompt, .val, .check-name, .check-tip { overflow-wrap: anywhere; }
+.sheet-foot a { color: #1d5c8a; font-weight: 800; }
+footer { text-align: center; color: #5c5648; font-size: 20px; padding: 8px 16px 32px; }
+footer a {
+  color: #1d5c8a;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+}
+.skip {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  background: #fff;
+  color: #2c291c;
+  padding: 8px 12px;
+  border-radius: 10px;
+  z-index: 30;
+  font-weight: 800;
+}
+.skip:focus { top: 8px; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.is-hidden { display: none !important; }
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 41, 28, .4);
+  z-index: 40;
+}
+.confirm {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 41;
+  max-width: 640px;
+  margin: 0 auto;
+  background: #fff8e4;
+  border: 3px solid #e0b03a;
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: 0 12px 32px rgba(44, 41, 28, .2);
+}
+.confirm p { margin: 0 0 12px; font-weight: 800; font-size: 22px; }
+:focus-visible { outline: 3px solid #0f5f86; outline-offset: 3px; }
+@media (min-width: 720px) {
+  body { font-size: 22px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  #cheer[data-done="true"] { animation: pop .35s ease; }
+}
+@keyframes pop {
+  from { transform: scale(.98); }
+  to { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #cheer[data-done="true"] { animation: none; }
+}
+@media (forced-colors: active) {
+  .btn, .check, .chip, .step, .pip, .badge { border: 1px solid ButtonText; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body, header, .safety, h1, .sub, .sheet {
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+  .safety { border-bottom: 1pt solid #000; }
+  main { max-width: none; padding: 0; }
+  h1 { color: #000 !important; font-size: 22pt; }
+  h2, h3, .sheet-title { color: #000 !important; }
+  .sheet {
+    border: 1.5pt solid #000;
+    border-radius: 0;
+    padding: 0;
+  }
+  .k, .val, .sheet-list li, .sheet-foot { color: #000 !important; }
+  .val.empty-val { font-weight: 600; }
+  .sheet-row, .sheet-list li { break-inside: avoid; page-break-inside: avoid; }
+  a { color: #000 !important; text-decoration: none; }
+}
+@page { margin: 12mm; }
+</style>
+</head>
+<body>
+<a class="skip no-print" href="#brief">跳到任務</a>
+<div class="safety">🛡️ 唔好輸入真名、學號、學校、地址、相片</div>
+<header>
+  <a class="home no-print" href="../index.html">← 返回課程主頁</a>
+  <h1>🦊 第4節・AI 學習任務包</h1>
+  <p class="sub">適合小四至小六。完成一個任務，用返第1至第3節學過嘅功夫，幫同學複習。</p>
+</header>
+<div class="sticky no-print">
+  <nav class="steps" aria-label="頁面章節">
+    <a class="step" href="#brief"><b>1</b>任務</a>
+    <a class="step" href="#pass"><b>2</b>通關</a>
+    <a class="step" href="#reflect"><b>3</b>三句</a>
+    <a class="step" href="#pack"><b>4</b>任務包</a>
+  </nav>
+  <div id="status" class="status" role="status"></div>
+</div>
+<main>
+<p id="saveWarn" class="save-warn is-hidden">呢部裝置記唔到進度（可能開咗無痕模式）。你可以照樣列印或者下載。</p>
+
+<section id="brief" class="no-print">
+  <h2><span class="sn">1</span>任務說明</h2>
+  <div class="panel howto">
+    <p class="mission-line">今次任務：<strong>幫同學複習一個課題</strong></p>
+    <p>你要交一個學習任務包。用三樣已經學過嘅功夫，幫同學溫一個課題。三步可以唔使照次序。</p>
+    <ol>
+      <li>用 AI 做一張插圖或者海報（第1節）</li>
+      <li>做一副複習閃卡（第2節）</li>
+      <li>做負責任 AI 八點自評（第3節嘅八點）</li>
+    </ol>
+    <p>然後寫低你做咗咩，同三句總結。做完可以列印或者下載，帶去同同學一齊溫。</p>
+    <div class="actions">
+      <a class="btn primary" href="#pass">開始三個通關步驟</a>
+    </div>
+  </div>
+</section>
+
+<section id="topic" class="no-print">
+  <h2><span class="sn">2</span>揀課題</h2>
+  <div class="panel">
+    <p class="mission-line">預設任務：<strong>幫同學複習一個課題</strong></p>
+    <p class="note" id="topicHint">撳一個例子，或者自己打。<span class="nowrap">「自訂」</span>就係自己打課題名。</p>
+    <div class="chips" role="group" aria-label="課題例子">
+      <button type="button" class="chip" data-topic="交通安全" aria-pressed="false">交通安全</button>
+      <button type="button" class="chip" data-topic="環保" aria-pressed="false">環保</button>
+      <button type="button" class="chip" data-topic="校園禮儀" aria-pressed="false">校園禮儀</button>
+      <button type="button" class="chip" data-topic="自訂" aria-pressed="false">自訂</button>
+    </div>
+    <label class="lab" for="topicInput">課題
+      <input id="topicInput" name="mission-topic" type="text" maxlength="40" autocomplete="off" placeholder="自己打課題，例如：分數加減" aria-describedby="topicHint">
+    </label>
+  </div>
+</section>
+
+<section id="pass" class="no-print">
+  <h2><span class="sn">3</span>通關步驟</h2>
+  <ol class="pass-list">
+    <li class="step-card accent-art" id="step-art">
+      <h3><span class="sn">1</span>第1節・用 AI 做插圖／海報</h3>
+      <p>用 AI 畫一張溫習海報或者插圖，幫同學一眼睇到個課題重點。</p>
+      <p class="note">可以打開 Gemini，或者其他圖像工具。呢頁唔使嵌入嗰啲工具，亦唔會喺度幫你整圖。</p>
+      <div class="actions">
+        <a class="btn primary" href="https://gemini.google.com" target="_blank" rel="noopener" title="https://gemini.google.com">✨ 打開 Gemini<span class="sr-only">（開新分頁）</span></a>
+      </div>
+      <p class="note">提示：叫 AI 用大字、色彩繽紛、適合小學生。唔好畫真人樣，唔好寫人名同學校。</p>
+      <p class="preview-lab">可以抄去 Gemini 或者圖像工具：</p>
+      <p class="prompt" id="artPrompt"></p>
+      <div class="actions">
+        <button type="button" class="btn ghost" id="copyPrompt">📋 複製提示詞</button>
+      </div>
+      <label class="check">
+        <input type="checkbox" id="done-art" data-step="art">
+        <span>
+          <span class="check-name">我完成咗呢一步</span>
+          <span class="check-tip">用 AI 做咗一張插圖或者海報，就可以剔。</span>
+        </span>
+      </label>
+    </li>
+    <li class="step-card accent-cards" id="step-cards">
+      <h3><span class="sn">2</span>第2節・複習閃卡</h3>
+      <p>去溫習閃卡頁，自己寫正面同背面，整一副卡俾同學複習呢個課題。</p>
+      <p class="note">想先睇吓點玩，可以試第2節嘅示範例子 1（食物生字閃卡）。</p>
+      <div class="actions">
+        <a class="btn primary" href="../maker/" target="_blank" rel="noopener" title="https://danielshtong.github.io/canvas-kids/maker/">🃏 打開複習閃卡<span class="sr-only">（開新分頁）</span></a>
+        <a class="btn ghost" href="../demo1/" target="_blank" rel="noopener" title="https://danielshtong.github.io/canvas-kids/demo1/">▶ 試玩示範例子 1<span class="sr-only">（開新分頁）</span></a>
+      </div>
+      <p class="note">會開新分頁，呢頁嘅進度會留低。閃卡本身記喺閃卡嗰一頁。做完返嚟剔低。</p>
+      <label class="check">
+        <input type="checkbox" id="done-cards" data-step="cards">
+        <span>
+          <span class="check-name">我完成咗呢一步</span>
+          <span class="check-tip">整咗複習閃卡，就可以剔。</span>
+        </span>
+      </label>
+    </li>
+    <li class="step-card accent-rai" id="step-rai">
+      <h3><span class="sn">3</span>第3節・負責任 AI 八點自評</h3>
+      <p>用返溫習閃卡頁同一套八點，檢查你嘅海報同閃卡，先至同同學分享。</p>
+      <fieldset class="checks" id="rai">
+        <legend>剔一剔先分享。有「重要」嘅三項會點亮「可以分享」。八項都剔，印章會變成「八點完成・可以分享」。</legend>
+        <label class="check">
+          <input type="checkbox" id="chk-fair" data-id="fair" data-name="公平公正" data-short="唔歧視任何人">
+          <span>
+            <span class="check-name">1. 公平公正 — 唔歧視任何人</span>
+            <span class="check-tip">唔好寫低人一等嘅說話，人人都值得被尊重。</span>
+          </span>
+        </label>
+        <label class="check key">
+          <input type="checkbox" id="chk-privacy" data-id="privacy" data-key="1" data-name="私隱保護" data-short="唔放個人資料">
+          <span>
+            <span class="check-name">2. 私隱保護 — 唔放個人資料 <em class="key-tag">重要</em></span>
+            <span class="check-tip">唔好寫真名、學號、學校、電話、地址或者相片。</span>
+          </span>
+        </label>
+        <label class="check key">
+          <input type="checkbox" id="chk-truth" data-id="truth" data-key="1" data-name="真實可靠" data-short="答案要核對過">
+          <span>
+            <span class="check-name">3. 真實可靠 — 答案要核對過 <em class="key-tag">重要</em></span>
+            <span class="check-tip">中文意思同串法，要同課本或者老師對一次。</span>
+          </span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="chk-safety" data-id="safety" data-name="安全穩健" data-short="唔教危險行為">
+          <span>
+            <span class="check-name">4. 安全穩健 — 唔教危險行為</span>
+            <span class="check-tip">唔好教人做危險、傷人或者違法嘅事。</span>
+          </span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="chk-clear" data-id="clear" data-name="透明清楚" data-short="說明內容從邊嚟">
+          <span>
+            <span class="check-name">5. 透明清楚 — 說明內容從邊嚟</span>
+            <span class="check-tip">如果有 AI 幫手，就講聲「用 AI 協助製作」。</span>
+          </span>
+        </label>
+        <label class="check key">
+          <input type="checkbox" id="chk-duty" data-id="duty" data-key="1" data-name="負責任" data-short="自己檢查先再用">
+          <span>
+            <span class="check-name">6. 負責任 — 自己檢查先再用 <em class="key-tag">重要</em></span>
+            <span class="check-tip">交出去或者列印之前，自己讀一次正面同背面。</span>
+          </span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="chk-include" data-id="include" data-name="包容多元" data-short="用語友善、顧及唔同同學">
+          <span>
+            <span class="check-name">7. 包容多元 — 用語友善、顧及唔同同學</span>
+            <span class="check-tip">用大家睇得明、唔會令同學唔開心嘅字。</span>
+          </span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="chk-human" data-id="human" data-name="以人為本" data-short="幫助學習，唔傷害人">
+          <span>
+            <span class="check-name">8. 以人為本 — 幫助學習，唔傷害人</span>
+            <span class="check-tip">閃卡用嚟溫習，唔好用嚟抄功課或者整蠱人。</span>
+          </span>
+        </label>
+      </fieldset>
+      <div class="badge-box" id="badgeBox">
+        <p class="badge is-hidden" id="badgeMark"></p>
+        <p id="badgeHelp">仲未有印章。請剔「私隱保護」「真實可靠」「負責任」，就會顯示「可以分享」。未剔都仲可以寫筆記同列印。</p>
+      </div>
+      <p id="badgeLive" class="sr-only" aria-live="polite"></p>
+    </li>
+  </ol>
+</section>
+
+<section id="notes" class="no-print">
+  <h2><span class="sn">4</span>作品筆記</h2>
+  <div class="panel">
+    <label class="lab" for="notesInput">你做咗咩？（可以貼一小段描述）
+      <textarea id="notesInput" name="mission-notes" maxlength="800" rows="4" placeholder="例如：我畫咗一張過馬路海報，又做咗 6 張閃卡講交通標誌。"></textarea>
+    </label>
+    <p class="note">呢格唔計入完成進度，不過會印喺任務包度。</p>
+  </div>
+</section>
+
+<section id="reflect" class="no-print">
+  <h2><span class="sn">5</span>三句總結</h2>
+  <div class="panel">
+    <p class="note" id="reflectHint">三句都寫低，先算完成呢部分。</p>
+    <label class="lab" for="refSkill">我用咗咩 AI 技巧
+      <textarea id="refSkill" name="mission-skill" maxlength="200" rows="2" placeholder="例如：我用 Gemini 畫海報，又用閃卡頁寫重點" aria-describedby="reflectHint"></textarea>
+    </label>
+    <label class="lab" for="refUseful">邊度最有用
+      <textarea id="refUseful" name="mission-useful" maxlength="200" rows="2" placeholder="例如：閃卡最有用，同學可以自己反轉溫"></textarea>
+    </label>
+    <label class="lab" for="refNext">下次想再試咩
+      <textarea id="refNext" name="mission-next" maxlength="200" rows="2" placeholder="例如：下次想試下配對遊戲"></textarea>
+    </label>
+  </div>
+</section>
+
+<section id="progress" class="no-print">
+  <h2><span class="sn">★</span>而家進度</h2>
+  <div class="panel" id="cheer" data-done="false">
+    <div class="bar" aria-hidden="true">
+      <span id="seg-art"></span>
+      <span id="seg-cards"></span>
+      <span id="seg-rai"></span>
+      <span id="seg-reflect"></span>
+    </div>
+    <ul class="pips" id="pips" aria-label="通關進度">
+      <li id="pip-art"><span class="pip">未完成</span>第1節・插圖／海報</li>
+      <li id="pip-cards"><span class="pip">未完成</span>第2節・複習閃卡</li>
+      <li id="pip-rai"><span class="pip">未完成</span>第3節・八點自評</li>
+      <li id="pip-reflect"><span class="pip">0 / 3</span>三句總結</li>
+    </ul>
+    <p class="cheer-text" id="cheerText"></p>
+  </div>
+</section>
+
+<section id="pack">
+  <h2 class="no-print"><span class="sn">6</span>我嘅任務包</h2>
+  <p class="note no-print">下面呢張就係你嘅任務包。列印會印呢一部分。</p>
+  <div class="sheet" id="sheet">
+    <p class="sheet-title">第4節・AI 學習任務包</p>
+    <p class="sheet-row"><span class="k">任務</span><span class="val" id="sheetMission">幫同學複習一個課題</span></p>
+    <p class="sheet-row"><span class="k">課題</span><span class="val empty-val" id="sheetTopic">（未揀）</span></p>
+    <p class="sheet-row"><span class="k">進度</span><span class="val" id="sheetProgress">0 / 4</span></p>
+    <p class="sheet-row"><span class="k">印章</span><span class="val" id="sheetBadge">未有印章</span></p>
+    <h3>通關步驟</h3>
+    <ul class="sheet-list">
+      <li id="sheetArt">[未做] 第1節・用 AI 做插圖／海報</li>
+      <li id="sheetCards">[未做] 第2節・複習閃卡</li>
+      <li id="sheetRai">[未做] 第3節・負責任 AI 八點自評</li>
+    </ul>
+    <h3>負責任 AI 八點自評</h3>
+    <ul class="sheet-list">
+      <li id="sheet-fair">[未剔] 公平公正 — 唔歧視任何人</li>
+      <li id="sheet-privacy">[未剔] 私隱保護 — 唔放個人資料</li>
+      <li id="sheet-truth">[未剔] 真實可靠 — 答案要核對過</li>
+      <li id="sheet-safety">[未剔] 安全穩健 — 唔教危險行為</li>
+      <li id="sheet-clear">[未剔] 透明清楚 — 說明內容從邊嚟</li>
+      <li id="sheet-duty">[未剔] 負責任 — 自己檢查先再用</li>
+      <li id="sheet-include">[未剔] 包容多元 — 用語友善、顧及唔同同學</li>
+      <li id="sheet-human">[未剔] 以人為本 — 幫助學習，唔傷害人</li>
+    </ul>
+    <h3>作品筆記</h3>
+    <p class="val empty-val" id="sheetNotes">（未填）</p>
+    <h3>三句總結</h3>
+    <p class="sheet-row"><span class="k">我用咗咩 AI 技巧</span><span class="val empty-val" id="sheetSkill">（未填）</span></p>
+    <p class="sheet-row"><span class="k">邊度最有用</span><span class="val empty-val" id="sheetUseful">（未填）</span></p>
+    <p class="sheet-row"><span class="k">下次想再試咩</span><span class="val empty-val" id="sheetNext">（未填）</span></p>
+    <p class="sheet-foot">請同老師或者課本核對。分享時講明「用 AI 協助製作」。唔好寫個人資料。<br><a href="https://danielshtong.github.io/canvas-kids/mission/">https://danielshtong.github.io/canvas-kids/mission/</a></p>
+  </div>
+  <div class="actions no-print">
+    <button type="button" class="btn primary" id="printBtn">🖨️ 列印任務包</button>
+    <button type="button" class="btn ghost" id="txtBtn">📄 下載文字</button>
+    <button type="button" class="btn ghost" id="jsonBtn">下載 JSON</button>
+    <button type="button" class="btn danger" id="clearBtn">清空呢部裝置</button>
+  </div>
+  <p class="note no-print">資料只係儲存喺呢部裝置。換一部平板就睇唔到，下載可以留低檔案。未填完都仲可以列印同下載。</p>
+</section>
+</main>
+<footer class="no-print">
+  <p>⭐ 幫同學溫習之前，自己先檢查一次。AI 都會錯，記得同課本或者老師核對。</p>
+  <p><a href="../index.html">← 返回課程主頁</a></p>
+  <p><a href="../maker/">🃏 第3節・自製溫習閃卡</a></p>
+</footer>
+<noscript><p class="safety">請開啟 JavaScript，進度先會記得住。任務說明同八點都仲睇到。</p></noscript>
+
+<div id="confirmBack" class="backdrop no-print is-hidden"></div>
+<div id="confirmBar" class="confirm no-print is-hidden" role="alertdialog" aria-modal="true" aria-labelledby="confirmText">
+  <p id="confirmText" tabindex="-1"></p>
+  <div class="actions">
+    <button type="button" class="btn primary" id="confirmYes">確定</button>
+    <button type="button" class="btn ghost" id="confirmNo">取消</button>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  /* localStorage: canvas-kids-mission-v1
+     印章：私隱保護 + 真實可靠 + 負責任 → 可以分享；八項全剔 → 八點完成・可以分享。
+     慶祝：第1步、第2步、上面三項，再加三句總結都寫低。
+     未齊都仲可以寫筆記、列印同下載。 */
+  var STORAGE_KEY = "canvas-kids-mission-v1";
+  var MISSION = "幫同學複習一個課題";
+  var PRESETS = ["交通安全", "環保", "校園禮儀"];
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function $(id) { return document.getElementById(id); }
+
+  var topicEl = $("topicInput");
+  var notesEl = $("notesInput");
+  var skillEl = $("refSkill");
+  var usefulEl = $("refUseful");
+  var nextEl = $("refNext");
+  var boxes = Array.prototype.slice.call(document.querySelectorAll("#rai input"));
+  var keyBoxes = boxes.filter(function (b) { return b.dataset.key === "1"; });
+  var stepBoxes = Array.prototype.slice.call(document.querySelectorAll("[data-step]"));
+  var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
+
+  var state = {
+    topic: "",
+    steps: { art: false, cards: false },
+    checks: {},
+    notes: "",
+    reflect: { skill: "", useful: "", next: "" }
+  };
+  boxes.forEach(function (b) { state.checks[b.dataset.id] = false; });
+  var customIntent = false;
+  var wasDone = false;
+  var armed = false;
+  var badgeAnnounced = false;
+  var lastBadgeMode = "none";
+  var pendingYes = null;
+  var returnFocus = null;
+
+  function keysOk() {
+    return keyBoxes.every(function (b) { return !!state.checks[b.dataset.id]; });
+  }
+  function allOk() {
+    return boxes.every(function (b) { return !!state.checks[b.dataset.id]; });
+  }
+  function badgeMode() {
+    if (allOk()) return "all";
+    if (keysOk()) return "ready";
+    return "none";
+  }
+  function badgeLabel() {
+    var mode = badgeMode();
+    if (mode === "all") return "八點完成・可以分享";
+    if (mode === "ready") return "可以分享";
+    return "未有印章";
+  }
+  function reflectCount() {
+    var n = 0;
+    if (state.reflect.skill.trim()) n += 1;
+    if (state.reflect.useful.trim()) n += 1;
+    if (state.reflect.next.trim()) n += 1;
+    return n;
+  }
+  function doneCount() {
+    var n = 0;
+    if (state.steps.art) n += 1;
+    if (state.steps.cards) n += 1;
+    if (keysOk()) n += 1;
+    if (reflectCount() === 3) n += 1;
+    return n;
+  }
+  function missionDone() {
+    return state.steps.art && state.steps.cards && keysOk() && reflectCount() === 3;
+  }
+  function topicPhrase() {
+    return state.topic.trim() || "【課題】";
+  }
+  function artPrompt() {
+    return "幫我畫一張「" + topicPhrase() + "」溫習海報，用嚟幫同學複習。要大字、色彩繽紛、重點三個以內，標題用繁體中文。唔好畫真人樣，唔好寫人名、學校或者電話。";
+  }
+  function missingBits() {
+    var bits = [];
+    if (!state.steps.art) bits.push("插圖／海報");
+    if (!state.steps.cards) bits.push("複習閃卡");
+    if (!keysOk()) {
+      var missing = keyBoxes.filter(function (b) { return !state.checks[b.dataset.id]; });
+      if (missing.length === keyBoxes.length) bits.push("八點自評");
+      else bits.push("八點自評（仲差" + missing.map(function (b) { return b.dataset.name; }).join("、") + "）");
+    }
+    var rc = reflectCount();
+    if (rc < 3) bits.push("三句總結（" + rc + " / 3）");
+    return bits;
+  }
+  function progressSentence() {
+    if (missionDone()) {
+      if (allOk()) return "🎉 任務完成！三個通關步驟同三句總結都做好，八點自評都剔齊。可以安心同同學分享。";
+      return "🎉 任務完成！三個通關步驟同三句總結都做好。印章係「可以分享」。可以列印任務包，同同學一齊溫。";
+    }
+    return "進度 " + doneCount() + " / 4。仲差：" + missingBits().join("、") + "。";
+  }
+  function setStatus(text, kind) {
+    var el = $("status");
+    if (el.textContent !== text) el.textContent = text;
+    el.classList.remove("ok", "warn", "progress", "done");
+    if (kind) el.classList.add(kind);
+    syncScrollPad();
+  }
+  function syncScrollPad() {
+    var bar = document.querySelector(".sticky");
+    if (!bar) return;
+    document.documentElement.style.scrollPaddingTop = (bar.offsetHeight + 16) + "px";
+  }
+  function payload() {
+    var checks = {};
+    boxes.forEach(function (b) { checks[b.dataset.id] = !!state.checks[b.dataset.id]; });
+    return {
+      v: 1,
+      topic: state.topic.slice(0, 40),
+      steps: { art: !!state.steps.art, cards: !!state.steps.cards },
+      checks: checks,
+      notes: state.notes.slice(0, 800),
+      reflect: {
+        skill: state.reflect.skill.slice(0, 200),
+        useful: state.reflect.useful.slice(0, 200),
+        next: state.reflect.next.slice(0, 200)
+      }
+    };
+  }
+  function exportData() {
+    var checks = {};
+    boxes.forEach(function (b) { checks[b.dataset.name] = !!state.checks[b.dataset.id]; });
+    return {
+      version: 1,
+      lesson: "第4節",
+      title: "AI 學習任務包",
+      url: "https://danielshtong.github.io/canvas-kids/mission/",
+      mission: MISSION,
+      topic: state.topic.trim(),
+      steps: {
+        "第1節・用 AI 做插圖／海報": !!state.steps.art,
+        "第2節・複習閃卡": !!state.steps.cards,
+        "第3節・負責任 AI 八點自評": keysOk()
+      },
+      checks: checks,
+      badge: badgeLabel(),
+      notes: state.notes.trim(),
+      reflections: {
+        "我用咗咩 AI 技巧": state.reflect.skill.trim(),
+        "邊度最有用": state.reflect.useful.trim(),
+        "下次想再試咩": state.reflect.next.trim()
+      }
+    };
+  }
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload()));
+      $("saveWarn").classList.add("is-hidden");
+      return true;
+    } catch (e) {
+      $("saveWarn").classList.remove("is-hidden");
+      return false;
+    }
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      if (!data || typeof data !== "object") return;
+      if (typeof data.topic === "string") state.topic = data.topic.slice(0, 40);
+      if (data.steps && typeof data.steps === "object") {
+        state.steps.art = data.steps.art === true;
+        state.steps.cards = data.steps.cards === true;
+      }
+      if (data.checks && typeof data.checks === "object") {
+        boxes.forEach(function (b) { state.checks[b.dataset.id] = data.checks[b.dataset.id] === true; });
+      }
+      if (typeof data.notes === "string") state.notes = data.notes.slice(0, 800);
+      if (data.reflect && typeof data.reflect === "object") {
+        ["skill", "useful", "next"].forEach(function (k) {
+          if (typeof data.reflect[k] === "string") state.reflect[k] = data.reflect[k].slice(0, 200);
+        });
+      }
+    } catch (e) {}
+  }
+  function fillVal(id, text, emptyLabel) {
+    var el = $(id);
+    var t = (text || "").trim();
+    el.textContent = t || emptyLabel;
+    el.classList.toggle("empty-val", !t);
+  }
+  function setPip(id, label, on, all) {
+    var pip = $(id).querySelector(".pip");
+    pip.textContent = label;
+    pip.classList.toggle("on", !!on);
+    pip.classList.toggle("all", !!all);
+  }
+  function paint() {
+    var topic = state.topic.trim();
+    chips.forEach(function (btn) {
+      var on = false;
+      if (btn.dataset.topic === "自訂") on = customIntent || (!!topic && PRESETS.indexOf(topic) === -1);
+      else on = topic === btn.dataset.topic;
+      btn.classList.toggle("on", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    $("artPrompt").textContent = artPrompt();
+    stepBoxes.forEach(function (box) {
+      box.checked = !!state.steps[box.dataset.step];
+      box.closest(".check").classList.toggle("on", box.checked);
+    });
+    $("step-art").classList.toggle("done", !!state.steps.art);
+    $("step-cards").classList.toggle("done", !!state.steps.cards);
+    $("step-rai").classList.toggle("done", keysOk());
+    boxes.forEach(function (box) {
+      box.checked = !!state.checks[box.dataset.id];
+      box.closest(".check").classList.toggle("on", box.checked);
+      var on = !!state.checks[box.dataset.id];
+      $("sheet-" + box.dataset.id).textContent = (on ? "[已剔] " : "[未剔] ") + box.dataset.name + " — " + box.dataset.short;
+    });
+    var mode = badgeMode();
+    var mark = $("badgeMark");
+    var box = $("badgeBox");
+    mark.classList.remove("ready", "all", "is-hidden");
+    box.classList.remove("ready", "all");
+    if (mode === "none") {
+      mark.classList.add("is-hidden");
+      mark.textContent = "";
+      var missing = keyBoxes.filter(function (b) { return !state.checks[b.dataset.id]; }).map(function (b) { return b.dataset.name; });
+      if (missing.length === keyBoxes.length) {
+        $("badgeHelp").textContent = "仲未有印章。請剔「私隱保護」「真實可靠」「負責任」，就會顯示「可以分享」。未剔都仲可以寫筆記同列印。";
+      } else {
+        $("badgeHelp").textContent = "仲未有印章。請再剔：" + missing.join("、") + "。剔齊私隱保護、真實可靠、負責任，就會顯示「可以分享」。";
+      }
+    } else if (mode === "ready") {
+      mark.textContent = "可以分享";
+      mark.classList.add("ready");
+      box.classList.add("ready");
+      $("badgeHelp").textContent = "私隱、真實、負責都剔咗，任務包可以分享。如果八點都剔齊，印章會變成「八點完成・可以分享」。";
+    } else {
+      mark.textContent = "八點完成・可以分享";
+      mark.classList.add("all");
+      box.classList.add("all");
+      $("badgeHelp").textContent = "八點都檢查好。印章係「八點完成・可以分享」，可以安心同同學分享。";
+    }
+    if (!badgeAnnounced) {
+      badgeAnnounced = true;
+      lastBadgeMode = mode;
+    } else if (mode !== lastBadgeMode) {
+      lastBadgeMode = mode;
+      $("badgeLive").textContent = mode === "none" ? "印章收起咗。" : "印章：" + badgeLabel() + "。";
+    }
+    setPip("pip-art", state.steps.art ? "完成" : "未完成", state.steps.art, false);
+    setPip("pip-cards", state.steps.cards ? "完成" : "未完成", state.steps.cards, false);
+    var raiLabel = allOk() ? "八點完成" : (keysOk() ? "可以分享" : "未完成");
+    setPip("pip-rai", raiLabel, keysOk(), allOk());
+    var rc = reflectCount();
+    setPip("pip-reflect", rc === 3 ? "完成" : (rc + " / 3"), rc === 3, false);
+    $("seg-art").classList.toggle("on", !!state.steps.art);
+    $("seg-cards").classList.toggle("on", !!state.steps.cards);
+    $("seg-rai").classList.toggle("on", keysOk());
+    $("seg-reflect").classList.toggle("on", rc === 3);
+    var done = missionDone();
+    $("cheer").dataset.done = done ? "true" : "false";
+    $("cheerText").textContent = progressSentence();
+    $("sheetMission").textContent = MISSION;
+    fillVal("sheetTopic", topic, "（未揀）");
+    $("sheetProgress").textContent = done ? "任務完成（4 / 4）" : (doneCount() + " / 4");
+    $("sheetBadge").textContent = badgeLabel();
+    $("sheetArt").textContent = (state.steps.art ? "[完成] " : "[未做] ") + "第1節・用 AI 做插圖／海報";
+    $("sheetCards").textContent = (state.steps.cards ? "[完成] " : "[未做] ") + "第2節・複習閃卡";
+    $("sheetRai").textContent = (keysOk() ? "[完成] " : "[未做] ") + "第3節・負責任 AI 八點自評";
+    fillVal("sheetNotes", state.notes, "（未填）");
+    fillVal("sheetSkill", state.reflect.skill, "（未填）");
+    fillVal("sheetUseful", state.reflect.useful, "（未填）");
+    fillVal("sheetNext", state.reflect.next, "（未填）");
+    if (armed && done && !wasDone) {
+      $("cheer").scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
+    }
+    wasDone = done;
+    armed = true;
+  }
+  function render(opts) {
+    var saved = save();
+    paint();
+    if (!saved) {
+      setStatus("呢部裝置記唔到進度，你可以照樣列印或者下載。", "warn");
+      return;
+    }
+    if (!opts || !opts.keepStatus) setStatus(progressSentence(), missionDone() ? "done" : "progress");
+  }
+  function writeField(el, value) {
+    if (document.activeElement !== el && el.value !== value) el.value = value;
+  }
+  function toText(data) {
+    var lines = [];
+    lines.push("第4節・AI 學習任務包");
+    lines.push(data.url);
+    lines.push("任務：" + data.mission);
+    lines.push("課題：" + (data.topic || "（未揀）"));
+    lines.push("進度：" + (missionDone() ? "任務完成（4 / 4）" : (doneCount() + " / 4")));
+    lines.push("印章：" + data.badge);
+    lines.push("");
+    lines.push("通關步驟：");
+    Object.keys(data.steps).forEach(function (name) {
+      lines.push((data.steps[name] ? "[完成] " : "[未做] ") + name);
+    });
+    lines.push("");
+    lines.push("負責任 AI 八點自評：");
+    boxes.forEach(function (b) {
+      var on = !!state.checks[b.dataset.id];
+      var tip = b.closest(".check").querySelector(".check-tip").textContent.trim();
+      lines.push((on ? "[已剔] " : "[未剔] ") + b.dataset.name + " — " + b.dataset.short);
+      lines.push("    " + tip);
+    });
+    lines.push("");
+    lines.push("作品筆記：");
+    lines.push(data.notes || "（未填）");
+    lines.push("");
+    lines.push("三句總結：");
+    Object.keys(data.reflections).forEach(function (name) {
+      lines.push(name + "：");
+      lines.push(data.reflections[name] || "（未填）");
+    });
+    lines.push("");
+    lines.push("請同老師或者課本核對。分享時講明「用 AI 協助製作」。唔好寫個人資料。");
+    return lines.join("\n");
+  }
+  function download(filename, mime, text) {
+    try {
+      var blob = new Blob([text], { type: mime });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+      return true;
+    } catch (e) {
+      setStatus("下載未成功，可以改用列印。", "warn");
+      return false;
+    }
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-1000px";
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return fallbackCopy(text); });
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+  function setModal(open) {
+    $("confirmBack").classList.toggle("is-hidden", !open);
+    $("confirmBar").classList.toggle("is-hidden", !open);
+    if (open) $("confirmText").focus();
+  }
+  function closeAsk() {
+    pendingYes = null;
+    var back = returnFocus;
+    returnFocus = null;
+    setModal(false);
+    if (back && back.focus) back.focus();
+  }
+  function openAsk(message, onYes, opener) {
+    pendingYes = onYes;
+    returnFocus = opener || document.activeElement;
+    $("confirmText").textContent = message;
+    setModal(true);
+  }
+
+  load();
+  var trimmedTopic = state.topic.trim();
+  if (trimmedTopic && PRESETS.indexOf(trimmedTopic) === -1) customIntent = true;
+  writeField(topicEl, state.topic);
+  writeField(notesEl, state.notes);
+  writeField(skillEl, state.reflect.skill);
+  writeField(usefulEl, state.reflect.useful);
+  writeField(nextEl, state.reflect.next);
+  render();
+
+  chips.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      if (btn.dataset.topic === "自訂") {
+        if (PRESETS.indexOf(state.topic.trim()) !== -1) state.topic = "";
+        customIntent = true;
+        writeField(topicEl, state.topic);
+        topicEl.value = state.topic;
+        render();
+        topicEl.focus();
+        return;
+      }
+      customIntent = false;
+      state.topic = btn.dataset.topic;
+      topicEl.value = state.topic;
+      render();
+    });
+  });
+  topicEl.addEventListener("input", function () {
+    if (topicEl.value.length > 40) topicEl.value = topicEl.value.slice(0, 40);
+    state.topic = topicEl.value;
+    var t = state.topic.trim();
+    if (PRESETS.indexOf(t) !== -1) customIntent = false;
+    else if (t) customIntent = true;
+    render();
+  });
+  stepBoxes.forEach(function (box) {
+    box.addEventListener("change", function () {
+      state.steps[box.dataset.step] = box.checked;
+      render();
+    });
+  });
+  boxes.forEach(function (box) {
+    box.addEventListener("change", function () {
+      state.checks[box.dataset.id] = box.checked;
+      render();
+    });
+  });
+  notesEl.addEventListener("input", function () {
+    if (notesEl.value.length > 800) notesEl.value = notesEl.value.slice(0, 800);
+    state.notes = notesEl.value;
+    render();
+  });
+  function bindReflect(el, key) {
+    el.addEventListener("input", function () {
+      if (el.value.length > 200) el.value = el.value.slice(0, 200);
+      state.reflect[key] = el.value;
+      render();
+    });
+  }
+  bindReflect(skillEl, "skill");
+  bindReflect(usefulEl, "useful");
+  bindReflect(nextEl, "next");
+
+  $("copyPrompt").addEventListener("click", function () {
+    var btn = $("copyPrompt");
+    copyText(artPrompt()).then(function (ok) {
+      btn.textContent = ok ? "✅ 已複製！" : "請長按提示詞複製";
+      clearTimeout(btn._t);
+      btn._t = setTimeout(function () { btn.textContent = "📋 複製提示詞"; }, 1500);
+    });
+  });
+  $("printBtn").addEventListener("click", function () {
+    render();
+    window.print();
+  });
+  window.addEventListener("beforeprint", function () { paint(); });
+  $("txtBtn").addEventListener("click", function () {
+    if (download("mission-pack.txt", "text/plain;charset=utf-8", "\uFEFF" + toText(exportData()))) {
+      setStatus("已下載文字檔。", "ok");
+    }
+  });
+  $("jsonBtn").addEventListener("click", function () {
+    if (download("mission-pack.json", "application/json;charset=utf-8", JSON.stringify(exportData(), null, 2) + "\n")) {
+      setStatus("已下載 JSON。", "ok");
+    }
+  });
+  $("clearBtn").addEventListener("click", function () {
+    openAsk("清走呢個任務包？課題、剔選、筆記同三句總結都會不見。呢個動作只會影響呢部裝置。", function () {
+      state.topic = "";
+      state.steps.art = false;
+      state.steps.cards = false;
+      boxes.forEach(function (b) { state.checks[b.dataset.id] = false; });
+      state.notes = "";
+      state.reflect.skill = "";
+      state.reflect.useful = "";
+      state.reflect.next = "";
+      customIntent = false;
+      topicEl.value = "";
+      notesEl.value = "";
+      skillEl.value = "";
+      usefulEl.value = "";
+      nextEl.value = "";
+      render({ keepStatus: true });
+      setStatus("已清空呢部裝置嘅任務包。", "ok");
+      topicEl.focus();
+    }, $("clearBtn"));
+  });
+  $("confirmYes").addEventListener("click", function () {
+    var fn = pendingYes;
+    closeAsk();
+    if (fn) fn();
+  });
+  $("confirmNo").addEventListener("click", closeAsk);
+  $("confirmBack").addEventListener("click", closeAsk);
+  document.addEventListener("keydown", function (e) {
+    if ($("confirmBar").classList.contains("is-hidden")) return;
+    if (e.key === "Escape") { e.preventDefault(); closeAsk(); return; }
+    if (e.key !== "Tab") return;
+    var nodes = [$("confirmText"), $("confirmYes"), $("confirmNo")];
+    var first = nodes[0];
+    var last = nodes[nodes.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+  window.addEventListener("resize", syncScrollPad);
+})();
+</script>
+</body>
+</html>
